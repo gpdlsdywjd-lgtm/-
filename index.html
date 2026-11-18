@@ -536,14 +536,15 @@
 </div>
 
 <script>
-// 파이어베이스 초기화 및 구글 로그인 관련 로직
+// 파이어베이스 초기화 및 구글 로그인 관련 로직 (실제 설정값 반영 완료)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDAxvT7i6BUsBttgPMsmUMdH_aEjoG-O1s",
+  authDomain: "project-lime-98854.firebaseapp.com",
+  projectId: "project-lime-98854",
+  storageBucket: "project-lime-98854.firebasestorage.app",
+  messagingSenderId: "934647683479",
+  appId: "1:934647683479:web:587a460b96c9a3e11cccd2",
+  measurementId: "G-7R4NCZDRW6"
 };
 
 if (!firebase.apps.length) {
@@ -2520,7 +2521,7 @@ function spotForAction(a){
   const n=a.name||'';
   if(/코딩|공부|게임|워치/.test(n))return 'chair';
   if(/잠|수면|낮잠/.test(n))return 'bed_lie';
-  if(/릴스|폰|유튜브/.test(n))return 'bed_sit';
+  if(/릴ส|폰|유튜브/.test(n))return 'bed_sit';
   if(/먹|피자|배달|식사/.test(n))return 'floor';
   if(/산책|운동|걷/.test(n))return 'laps';
   return null;
