@@ -553,7 +553,7 @@ function showFloat(msg){
 }
 window.showFloat = showFloat;
 
-// 파이어베이스 초기화 및 구글 로그인 관련 로직 (실제 설정값 반영 완료)
+// 파이어베이스 초기화 및 구글 로그인 관련 로직 (리다이렉트 방식 적용)
 const firebaseConfig = {
   apiKey: "AIzaSyDAxvT7i6BUsBttgPMsmUMdH_aEjoG-O1s",
   authDomain: "project-lime-98854.firebaseapp.com",
@@ -571,6 +571,15 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 let currentUser = null;
+
+// 페이지 로드 시 리다이렉트 로그인 결과 처리
+auth.getRedirectResult().then(result => {
+  if (result.user) {
+    showFloat("구글 로그인 성공!");
+  }
+}).catch(error => {
+  showFloat("로그인 실패: " + error.message);
+});
 
 auth.onAuthStateChanged(user => {
   currentUser = user;
@@ -597,10 +606,8 @@ window.toggleGoogleLogin = function() {
     }
   } else {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(result => {
-      showFloat("구글 로그인 성공!");
-    }).catch(error => {
-      showFloat("로그인 실패: " + error.message);
+    auth.signInWithRedirect(provider).catch(error => {
+      showFloat("로그인 요청 실패: " + error.message);
     });
   }
 };
@@ -2523,7 +2530,7 @@ function spotForAction(a){
   const n=a.name||'';
   if(/코딩|공부|게임|워치/.test(n))return 'chair';
   if(/잠|수면|낮잠/.test(n))return 'bed_lie';
-  if(/릴ส|폰|유튜브/.test(n))return 'bed_sit';
+  if(/릴스|폰|유튜브/.test(n))return 'bed_sit';
   if(/먹|피자|배달|식사/.test(n))return 'floor';
   if(/산책|운동|걷/.test(n))return 'laps';
   return null;
