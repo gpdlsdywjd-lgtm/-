@@ -503,7 +503,7 @@
 
       <div id="bug-game-area" class="w-full flex-1 relative bg-[#222233] border-2 border-red-500/40 rounded-xl overflow-hidden my-2 shadow-inner">
         <div class="absolute inset-0 flex items-center justify-center text-xs text-[#aaa] font-bold text-center p-4 pointer-events-none" id="bug-start-guide">
-          위에서 아래로 내려오는 한글 에러 코드를 보고<br>아래 입력창에 정확히 한글로 타이핑하고 엔터를 치세요!<br>(기본 5분 | 성공 +5초 | 오타·경계선 침범 -5초)
+          위에서 내려오는 한글 에러 코드를 보고<br>아래 입력창에 정확히 한글로 타이핑하고 엔터를 치세요!<br>(기본 5분 | 성공 +5초 | 오타·경계선 침범 -5초)
         </div>
         <div class="absolute bottom-12 left-0 right-0 border-b-2 border-dashed border-cyan-400 pointer-events-none z-10 flex justify-end pr-2">
           <span class="text-[9px] text-cyan-300 bg-black/60 px-1 rounded">경계선</span>
@@ -536,6 +536,23 @@
 </div>
 
 <script>
+// 전역 범위에 showFloat 함수 정의 (로그인 핸들러 등에서 즉시 호출 가능)
+let toastTimer = null;
+function showFloat(msg){
+  const el = document.getElementById("achieve-float");
+  if(el){
+    el.textContent = msg;
+    setTimeout(()=>{ if(el.textContent === msg) el.textContent = ""; }, 3200);
+  }
+  const container = document.getElementById("global-toast-container");
+  if(container){
+    container.innerHTML = `<div class="global-toast">${String(msg).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}</div>`;
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>{ container.innerHTML = ""; }, 3000);
+  }
+}
+window.showFloat = showFloat;
+
 // 파이어베이스 초기화 및 구글 로그인 관련 로직 (실제 설정값 반영 완료)
 const firebaseConfig = {
   apiKey: "AIzaSyDAxvT7i6BUsBttgPMsmUMdH_aEjoG-O1s",
@@ -849,21 +866,6 @@ function renderCoreGoalRoom(){
       coreTxtEl.style.textDecoration="none";
       coreTxtEl.style.opacity="1";
     }
-  }
-}
-
-let toastTimer=null;
-function showFloat(msg){
-  const el=document.getElementById("achieve-float");
-  if(el){
-    el.textContent=msg;
-    setTimeout(()=>{if(el.textContent===msg)el.textContent="";},3200);
-  }
-  const container=document.getElementById("global-toast-container");
-  if(container){
-    container.innerHTML=`<div class="global-toast">${esc(msg)}</div>`;
-    if(toastTimer)clearTimeout(toastTimer);
-    toastTimer=setTimeout(()=>{container.innerHTML="";},3000);
   }
 }
 
@@ -2464,7 +2466,7 @@ lightMenu.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)
     navigator.geolocation.getCurrentPosition(p=>{setLoc({name:'현재 위치',lat:+p.coords.latitude.toFixed(4),lon:+p.coords.longitude.toFixed(4)});showBubble('📍 현재 위치로 맞췄어요',1600);},
       ()=>{renderLightMenu();showBubble('⚠️ 위치 권한을 쓸 수 없어요. 목록에서 골라 주세요',2400);},{timeout:8000,maximumAge:3600000});}
 });
-lightMenu.addEventListener('change',e=>{if(e.target.dataset.city==null)return;const c=CITIES.find(x=>x[0]===e.target.value);if(c){setLoc({name:c[0],lat:c[1],lon:c[2]});showBubble(`📍 ${c[0]} 기준으로 바꿨어요`,1400);}});
+lightMenu.addEventListener('change',e=>{if(e.target.dataset.city==null)return;const c=CITIES.find(x=>x[0]===e.target.value);if(c){setLoc({name:c[0],lat:c[1],lon:c[2]});showBubble(`📍 ${c[0]} 기준으로 바꿨어요',1400);}});
 document.addEventListener('pointerdown',e=>{if(lightMenu.style.display==='block'&&!lightMenu.contains(e.target)&&e.target!==lightChip)lightMenu.style.display='none';});
 computeTarget(); stepDaylight(0,true); updateChip(); applyEstate(G.S.currentEstate||'semi_basement');
 
