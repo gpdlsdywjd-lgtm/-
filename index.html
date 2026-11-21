@@ -310,6 +310,9 @@
         <span class="hidden sm:inline text-xs font-semibold text-[#7a6e65] border-l border-[#d8cebe] pl-2">방구석 인생 타이쿤</span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
+        <button id="bgm-toggle-btn" type="button" aria-pressed="false" class="px-2.5 py-1 rounded-lg bg-white border border-[#b2d264] text-[10px] font-bold text-[#4a6b1e] hover:bg-[#f7fbe9] transition-all flex items-center gap-1 shadow-sm" title="배경음 켜기">
+          <span id="bgm-toggle-icon">🔇</span><span id="bgm-toggle-label">BGM OFF</span>
+        </button>
         <button id="google-login-btn" type="button" onclick="googleLogin()" class="px-2.5 py-1 rounded-lg bg-white border border-[#d8cebe] text-[10px] font-bold text-[#2b2621] hover:bg-[#f7fbe9] transition-all flex items-center gap-1 shadow-sm">
           <span>🌐</span> <span id="google-login-label">구글 로그인</span>
         </button>
@@ -533,6 +536,80 @@
 
 <script>
 (function(){
+const BGM_BASE_URL = "https://raw.githubusercontent.com/gpdlsdywjd-lgtm/-/main/bgm/";
+const bgmTracks = {
+  calm: new Audio(BGM_BASE_URL + "bgm-calm-piano.mp3"),
+  arcade: new Audio(BGM_BASE_URL + "bgm-retro-arcade.mp3")
+};
+Object.values(bgmTracks).forEach(audio => {
+  audio.loop = true;
+  audio.preload = "auto";
+  audio.volume = 0;
+});
+let bgmEnabled = false;
+let bgmCurrentTrack = "calm";
+let bgmFadeFrame = 0;
+
+function updateBgmButton(){
+  const btn = document.getElementById("bgm-toggle-btn");
+  const icon = document.getElementById("bgm-toggle-icon");
+  const label = document.getElementById("bgm-toggle-label");
+  if(!btn || !icon || !label) return;
+  icon.textContent = bgmEnabled ? "🔊" : "🔇";
+  label.textContent = bgmEnabled ? "BGM ON" : "BGM OFF";
+  btn.setAttribute("aria-pressed", String(bgmEnabled));
+  btn.title = bgmEnabled ? "배경음 끄기" : "배경음 켜기";
+}
+
+function switchBgmTrack(trackKey){
+  if(!bgmTracks[trackKey]) return;
+  bgmCurrentTrack = trackKey;
+  if(!bgmEnabled) return;
+
+  if(bgmFadeFrame) cancelAnimationFrame(bgmFadeFrame);
+  const incoming = bgmTracks[trackKey];
+  const outgoing = bgmTracks[trackKey === "calm" ? "arcade" : "calm"];
+  const startIncoming = incoming.volume;
+  const startOutgoing = outgoing.volume;
+  const duration = 900;
+  const startTime = performance.now();
+
+  incoming.play().catch(err => {
+    console.warn("[bgm] 재생을 시작하지 못했습니다:", err);
+  });
+
+  const fade = now => {
+    const progress = Math.min(1, (now - startTime) / duration);
+    incoming.volume = Math.min(1, startIncoming + (1 - startIncoming) * progress);
+    outgoing.volume = Math.max(0, startOutgoing * (1 - progress));
+    if(progress < 1){
+      bgmFadeFrame = requestAnimationFrame(fade);
+    }else{
+      outgoing.pause();
+      outgoing.volume = 0;
+      incoming.volume = 1;
+      bgmFadeFrame = 0;
+    }
+  };
+  bgmFadeFrame = requestAnimationFrame(fade);
+}
+
+function toggleBgm(){
+  bgmEnabled = !bgmEnabled;
+  if(bgmEnabled){
+    updateBgmButton();
+    switchBgmTrack(bgmCurrentTrack);
+  }else{
+    if(bgmFadeFrame) cancelAnimationFrame(bgmFadeFrame);
+    bgmFadeFrame = 0;
+    Object.values(bgmTracks).forEach(audio => {
+      audio.pause();
+      audio.volume = 0;
+    });
+    updateBgmButton();
+  }
+}
+
 const GOOGLE_CLIENT_ID = "620851573028-6ltomdpn8doa2juekfima0hcm0h5da27.apps.googleusercontent.com";
 const ACTIVE_USER_KEY = "lime-coding-tycoon-active-user";
 const BASE_SAVE_KEY = "lime-coding-tycoon-v87";
@@ -1969,6 +2046,9 @@ document.addEventListener("visibilitychange", ()=>{
 });
 
 document.addEventListener("DOMContentLoaded",()=>{
+  const bgmToggleBtn = document.getElementById("bgm-toggle-btn");
+  if(bgmToggleBtn) bgmToggleBtn.addEventListener("click", toggleBgm);
+  updateBgmButton();
   initGoogleAuth();
   applyCosmetics();
   renderActions();
@@ -2049,6 +2129,7 @@ const bugInput = document.getElementById("bug-input");
 
 window.startBugGameModal = function(){
   closePanel();
+  switchBgmTrack("arcade");
   bugModal.style.display="flex";
   bugGameRunning=false; bugScore=0; bugMissed=0; bugTimeLeft=300;
   updateBugHUD();
@@ -2141,7 +2222,7 @@ function endBugGame(){
 }
 
 bugStartBtn.onclick=startBugGame;
-document.getElementById("bug-close-btn").onclick=()=>{ bugGameRunning=false; clearInterval(bugTimerInterval); clearInterval(bugSpawnInterval); clearInterval(bugMoveInterval); bugModal.style.display="none"; };
+document.getElementById("bug-close-btn").onclick=()=>{ bugGameRunning=false; clearInterval(bugTimerInterval); clearInterval(bugSpawnInterval); clearInterval(bugMoveInterval); bugModal.style.display="none"; switchBgmTrack("calm"); };
 
 const FRUIT_ART_BASE = "https://gpdlsdywjd-lgtm.github.io/-/minigame-fruits/";
 const FRUIT_TIERS=[
@@ -2190,6 +2271,7 @@ function suikaPos(e){const r=suikaCanvas.getBoundingClientRect();return (e.clien
 
 window.startSuikaGame=function(){
   closePanel();
+  switchBgmTrack("arcade");
   document.getElementById("fullscreen-suika-modal").style.display="flex";
   suikaCanvas=document.getElementById("suikaCanvas");
   suikaCtx=suikaCanvas.getContext("2d");
@@ -2208,6 +2290,7 @@ document.getElementById("suika-close-btn").onclick=()=>{
   suikaRunning=false; cancelAnimationFrame(suikaRaf);
   document.getElementById("fullscreen-suika-modal").style.display="none";
   suikaSettle();
+  switchBgmTrack("calm");
 };
 
 function dropBall(x){
