@@ -534,7 +534,7 @@
     <div class="flex-1 relative overflow-hidden bg-[#fffae5] flex flex-col items-center justify-center p-4">
       <div class="text-xs font-bold text-[#b8860b] mb-1" id="suika-score-hud">점수: 0</div>
       <div class="text-[10px] font-bold text-[#a08a5a] mb-2">좌우로 움직여 조준 · 떼면 떨어뜨리기 · 같은 과일끼리 합쳐요</div>
-      <canvas id="suikaCanvas" width="260" height="420" class="bg-[#fff3b0] border-2 border-[#d8cebe] rounded-xl cursor-crosshair touch-none shadow-inner"></canvas>
+      <canvas id="suikaCanvas" width="380" height="600" style="width:auto;height:auto;max-width:100%;max-height:calc(88vh - 190px)" class="bg-[#fff3b0] border-2 border-[#d8cebe] rounded-xl cursor-crosshair touch-none shadow-inner"></canvas>
     </div>
   </div>
 </div>
@@ -2289,14 +2289,48 @@ const FRUIT_TIERS=[
   {radius:75,color:"#2a9d4b",name:"수박",score:120,imgUrl:FRUIT_ART_BASE+"watermelon.png"}
 ];
 
-const FRUIT_IMAGES = FRUIT_TIERS.map(tier => {
-  const img = new Image();
-  img.crossOrigin = "anonymous";
-  img.src = tier.imgUrl;
-  return img;
+// [수정] 과일 크기 1.5배 (충돌 반지름과 그림이 함께 커짐)
+const FRUIT_SCALE = 1.5;
+FRUIT_TIERS.forEach(t => { t.radius = Math.round(t.radius * FRUIT_SCALE); });
+
+// [수정] PNG의 투명 여백을 측정해서, 실제 과일 그림이 충돌 원(radius)에 꽉 차도록 그린다.
+// (여백 때문에 과일끼리 간격이 떠 보이던 문제 해결. 측정 실패 시 기존 방식으로 그림)
+const FRUIT_BOX = [];
+function measureFruitBox(img, tier){
+  try{
+    const w = img.naturalWidth, h = img.naturalHeight;
+    if(!w || !h) return;
+    const c = document.createElement("canvas"); c.width = w; c.height = h;
+    const g = c.getContext("2d"); g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, w, h).data;
+    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for(let y = 0; y < h; y++){
+      for(let x = 0; x < w; x++){
+        if(d[(y * w + x) * 4 + 3] > 24){
+          if(x < x0) x0 = x; if(x > x1) x1 = x;
+          if(y < y0) y0 = y; if(y > y1) y1 = y;
+        }
+      }
+    }
+    if(x1 >= x0 && y1 >= y0) FRUIT_BOX[tier] = {sx: x0, sy: y0, sw: x1 - x0 + 1, sh: y1 - y0 + 1};
+  }catch(e){ /* CORS 등으로 측정 불가 → 전체 이미지로 그림 */ }
+}
+// [수정] 이미지 로드 실패 대비: 1) CORS 설정 없이 재시도(여백 측정만 포기) 2) 그래도 안 되면 이모지 과일로 표시
+const FRUIT_EMOJI = ["🍒","🍓","🫐","🍎","🍇","🥝","🍊","🌺","🍋","🍐","🍑","🥥","🍍","🍈","🍉"];
+const FRUIT_IMAGES = [];
+FRUIT_TIERS.forEach((tier, i) => {
+  const load = (useCors) => {
+    const img = new Image();
+    if(useCors) img.crossOrigin = "anonymous";
+    img.onload = () => { if(useCors) measureFruitBox(img, i); };
+    img.onerror = () => { if(useCors) load(false); };
+    img.src = tier.imgUrl;
+    FRUIT_IMAGES[i] = img;
+  };
+  load(true);
 });
 
-const SK={GRAV:1500,STEP:1/120,DANGER:66,SPAWN_Y:34,REST:0.15,OVER_SEC:2.0,COOLDOWN:0.5};
+const SK={GRAV:2250,STEP:1/120,DANGER:99,SPAWN_Y:51,REST:0.15,OVER_SEC:2.0,COOLDOWN:0.5}; // [수정] 과일 1.5배에 맞춰 중력/위험선/생성 높이도 1.5배
 let suikaRunning=false, suikaScore=0, suikaCanvas, suikaCtx, suikaBalls=[], suikaRaf=0, suikaLast=0, suikaAcc=0;
 let suikaCur=0, suikaNext=0, suikaAim=130, suikaCool=0, suikaOver=0, suikaGameOver=false, suikaSettled=false, suikaClock=0;
 function suikaRand(){return Math.floor(Math.random()*5);}
@@ -2304,7 +2338,7 @@ function suikaRand(){return Math.floor(Math.random()*5);}
 function suikaReset(){
   suikaBalls=[]; suikaScore=0; suikaCur=suikaRand(); suikaNext=suikaRand(); suikaCool=0; suikaOver=0;
   suikaGameOver=false; suikaSettled=false; suikaClock=0; suikaAcc=0;
-  suikaAim=suikaCanvas?suikaCanvas.width/2:130;
+  suikaAim=suikaCanvas?suikaCanvas.width/2:190;
 }
 function suikaSettle(){
   if(suikaSettled) return; suikaSettled=true;
@@ -2373,13 +2407,13 @@ function suikaStep(dt){
     merges.forEach(([a,b])=>{
       if(a.tier<FRUIT_TIERS.length-1){
         const nt=a.tier+1,f=FRUIT_TIERS[nt];
-        suikaBalls.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,vx:(a.vx+b.vx)/4,vy:(a.vy+b.vy)/4-60,tier:nt,r:f.radius,born:suikaClock-0.5,dead:false});
+        suikaBalls.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,vx:(a.vx+b.vx)/4,vy:(a.vy+b.vy)/4-90,tier:nt,r:f.radius,born:suikaClock-0.5,dead:false});
         suikaScore+=f.score; S.gold+=Math.max(1,nt);
       }else{ suikaScore+=FRUIT_TIERS[a.tier].score; S.gold+=30; }
     });
     suikaBalls=suikaBalls.filter(b=>!b.dead); updateHUD();
   }
-  const danger=suikaBalls.some(b=>suikaClock-b.born>1&&b.y-b.r<SK.DANGER&&Math.abs(b.vy)<120);
+  const danger=suikaBalls.some(b=>suikaClock-b.born>1&&b.y-b.r<SK.DANGER&&Math.abs(b.vy)<180);
   suikaOver=danger?suikaOver+dt:0;
   if(suikaOver>SK.OVER_SEC){suikaGameOver=true;suikaSettle();}
 }
@@ -2390,16 +2424,21 @@ function drawFruit(ctx,x,y,tier,alpha){
   ctx.save();
   ctx.globalAlpha=alpha==null?1:alpha;
   if(img && img.complete && img.naturalWidth>0){
-    ctx.drawImage(img, x-r, y-r, r*2, r*2);
+    const bx = FRUIT_BOX[tier];
+    if(bx){
+      const k = (r * 2) / Math.max(bx.sw, bx.sh), dw = bx.sw * k, dh = bx.sh * k;
+      ctx.drawImage(img, bx.sx, bx.sy, bx.sw, bx.sh, x - dw / 2, y - dh / 2, dw, dh);
+    }else{
+      ctx.drawImage(img, x-r, y-r, r*2, r*2);
+    }
   }else{
     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=f.color;ctx.fill();
     ctx.lineWidth=2;ctx.strokeStyle="rgba(0,0,0,.28)";ctx.stroke();
     ctx.beginPath();ctx.ellipse(x-r*0.35,y-r*0.4,r*0.28,r*0.16,-0.6,0,Math.PI*2);ctx.fillStyle="rgba(255,255,255,.45)";ctx.fill();
     if(tier===14){ctx.strokeStyle="rgba(10,60,20,.55)";ctx.lineWidth=3;for(let k=-2;k<=2;k++){ctx.beginPath();ctx.ellipse(x+k*r*0.32,y,r*0.12,r*0.92,0,0,Math.PI*2);ctx.stroke();}}
-    ctx.fillStyle="rgba(40,30,30,.85)";
-    const ey=y+r*0.05,ex=Math.max(3,r*0.22);
-    ctx.beginPath();ctx.arc(x-ex,ey,Math.max(1.5,r*0.07),0,Math.PI*2);ctx.arc(x+ex,ey,Math.max(1.5,r*0.07),0,Math.PI*2);ctx.fill();
-    if(r>=20){ctx.font=`900 ${Math.min(14,Math.max(9,r*0.3))}px sans-serif`;ctx.textAlign="center";ctx.fillStyle="rgba(255,255,255,.95)";ctx.fillText(f.name,x,y+r*0.55);}
+    ctx.font=`${Math.round(r*1.3)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+    ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#000";
+    ctx.fillText(FRUIT_EMOJI[tier]||"",x,y+r*0.06);
   }
   ctx.restore();
 }
