@@ -3283,13 +3283,17 @@ const legL = legs[0], legR = legs[1], armL = arms[0], armR = arms[1];
 
 // [수정] 모델은 rot=0일 때 +z를 바라봄. 방 배치(침대/의자/식탁)에 맞게 위치·방향 보정
 const SPOTS={
-  reels:{pos:[-2.15,0.68,1.55],rot:Math.PI/2,anim:'reels',bubble:'📱 릴스 무한 스크롤...',chip:'📱'},
+  reels:{pos:[-2.05,0.745,1.55],rot:Math.PI/2,anim:'reels',bubble:'📱 릴스 무한 스크롤...',chip:'📱'},
   coding:{pos:[-0.17,0.36,-1.81],rot:Math.PI+CH_DESK.r,anim:'coding',bubble:'💻 버그야 가라...',chip:'💻',spot:'chair'},
   game:{pos:[-0.17,0.36,-1.81],rot:Math.PI+CH_DESK.r,anim:'game',bubble:'🎮 한 판만 더!',chip:'🎮',spot:'chair'},
   sleep:{pos:[-1.55,0.68,1.55],rot:Math.PI/2,anim:'sleep',bubble:'💤 쿨쿨...',chip:'💤',spot:'bed'},
-  eat:{pos:[1.36,0.08,0.92],rot:0,anim:'eat',bubble:'🍕 피자 최고!',chip:'🍕',spot:'table'},
+  eat:{pos:[1.36,0.09,0.95],rot:0,anim:'eat',bubble:'🍕 피자 최고!',chip:'🍕',spot:'table'},
   walk:{pos:[0.55,0,0.45],rot:2.3,anim:'walk',bubble:'👟 8천보 걷자!',chip:'👟'}
 };
+// [수정] 침대 올라가기 연출용: 담요 윗면 높이에 맞춘 앉는 높이 / 키프레임 생성 헬퍼
+const BED_SIT_Y=0.72;
+const isBedPos=v=>v.y>0.5&&v.x>-3.0&&v.x<-0.8&&v.z>0.8&&v.z<2.3;
+const KF=(x,y,z,o)=>Object.assign(new THREE.Vector3(x,y,z),o||{});
 const SPOT_MENU={
   chair:{title:'💻 책상·의자',actions:['coding','game']},
   bed:{title:'🛏️ 침대',actions:['sleep']},
@@ -3306,7 +3310,7 @@ const LABELS={
 const SPOT_NAMES={chair:'책상',bed:'침대',table:'식탁'};
 function spotForAction(a){return a&&(a.spot||(SPOTS[a.id]&&SPOTS[a.id].spot))||null;}
 
-let curAction=null, walkPath=[], walkIdx=0, walkOnDone=null, heroPos=new THREE.Vector3(-1.35,0,0.1), heroRot=0.45, heroAnim='reels', walkSpeed=3.2;
+let curAction=null, walkPath=[], walkIdx=0, walkOnDone=null, waitUntil=0, holdRot=undefined, legIdx=-1, heroPos=new THREE.Vector3(-1.35,0,0.1), heroRot=0.45, heroAnim='reels', walkSpeed=3.2;
 let timeMode='auto', lastSkyKey='', lastLampOn=null, lastScreenGlow=null, lastLedHue=null, menuOpen=false;
 const lp=new THREE.Vector3();
 
@@ -3359,34 +3363,39 @@ function setActionPose(anim){
   if(anim==='sleep'){body.rotation.x=-Math.PI/2;body.position.set(0,0.22,0.22);head.rotation.x=0.35;if(blanket)blanket.visible=false;if(coverBlanket)coverBlanket.visible=true;}
   else if(anim==='coding'||anim==='game'){body.position.y=-0.12;legL.rotation.x=-Math.PI/2.2;legR.rotation.x=-Math.PI/2.2;
     legL.position.y=0.38;legR.position.y=0.38;armL.rotation.x=-0.85;armR.rotation.x=-0.85;}
-  // 앉는 동작은 유지: eat은 식탁 앞에 앉기, reels는 침대 위에 앉기
-  else if(anim==='eat'){body.position.y=-0.28;legL.rotation.x=-Math.PI/2;legR.rotation.x=-Math.PI/2;
-    legL.position.y=0.3;legR.position.y=0.3;armR.rotation.x=-0.7;if(pizza)pizza.visible=true;}
-  else if(anim==='reels'){body.position.y=-0.28;legL.rotation.x=-Math.PI/2;legR.rotation.x=-Math.PI/2;
-    legL.position.y=0.3;legR.position.y=0.3;armR.rotation.x=-0.95;armR.rotation.z=-0.25;if(phone)phone.visible=true;}
+  // [수정] 앉기 자세 공통: 엉덩이/허벅지가 앉는 면에 닿도록 몸을 낮추고 다리를 앞으로 뻗는다.
+  const sit=()=>{body.position.y=-0.30;legL.rotation.x=-Math.PI/2;legR.rotation.x=-Math.PI/2;
+    legL.position.y=0.37;legR.position.y=0.37;};
+  if(anim==='eat'){sit();armR.rotation.x=-0.7;if(pizza)pizza.visible=true;}
+  else if(anim==='reels'){sit();armR.rotation.x=-0.95;armR.rotation.z=-0.25;if(phone)phone.visible=true;}
+  else if(anim==='scoot'){sit();armL.rotation.x=-0.5;armR.rotation.x=-0.5;}              // 침대 위에서 앉은 채 이동
+  else if(anim==='climb'){body.rotation.x=0.35;head.rotation.x=0.15;                      // 침대에 올라타는 중
+    armL.rotation.x=-1.3;armR.rotation.x=-1.3;legL.rotation.x=-1.0;legR.rotation.x=0.2;}
 }
-function startWalk(path,onDone){
+function startWalk(path,onDone,stayOnBed){
   // 침대에서 이동할 때는 침대 가장자리까지 걸어간 뒤, 발을 내리고 바닥에 내려선다.
   // 침대의 오른쪽 가장자리(x=-0.72) 바깥쪽에 단계별 경유점을 둬서 바닥으로 순간 이동하지 않게 한다.
   const pts=[];
-  const leavingBed=heroPos.y>0.3 && heroPos.x>-3.15 && heroPos.x<-0.65 && heroPos.z>0.55 && heroPos.z<2.5;
+  const leavingBed=!stayOnBed && heroPos.y>0.3 && heroPos.x>-3.15 && heroPos.x<-0.65 && heroPos.z>0.55 && heroPos.z<2.5;
   if(leavingBed){
     const edgeX=-0.48, edgeZ=heroPos.z;
     pts.push(new THREE.Vector3(edgeX,heroPos.y,edgeZ));       // 침대 위에서 가장자리로 이동
     pts.push(new THREE.Vector3(edgeX+0.08,0.38,edgeZ+0.08)); // 가장자리에 앉아 발을 내리는 단계
     pts.push(new THREE.Vector3(edgeX+0.12,0.12,edgeZ+0.18)); // 발이 바닥에 닿는 단계
     pts.push(new THREE.Vector3(edgeX+0.12,0,edgeZ+0.22));   // 두 발로 바닥에 서기
-  }else if(heroPos.y>0.015){
+  }else if(!stayOnBed && heroPos.y>0.015){
     // 의자 등 낮은 가구에서 출발할 때는 기존처럼 바닥 높이까지 내려온다.
     pts.push(new THREE.Vector3(heroPos.x,0,heroPos.z));
   }
   let from=pts.length?pts[pts.length-1]:heroPos;
-  path.forEach(p=>{if(p.distanceToSquared(from)>0.002){pts.push(p);from=p;}});
+  path.forEach(p=>{const isKf=p.pose||p.at||p.pause||p.rot!==undefined||p.faceAfter!==undefined;
+    if(isKf||p.distanceToSquared(from)>0.002){pts.push(p);from=p;}});
   if(!pts.length){walkPath=[];if(onDone)onDone();return;}
-  walkPath=pts; walkIdx=0; walkOnDone=onDone; setActionPose('walk'); setBubble('🚶 이동 중...',true);
+  walkPath=pts; walkIdx=0; walkOnDone=onDone; legIdx=-1; waitUntil=0; holdRot=undefined;
+  setActionPose(stayOnBed?'scoot':'walk'); setBubble('🚶 이동 중...',true);
 }
 function placeHero(act,instant){
-  const sp=SPOTS[act.id]||SPOTS.reels; walkPath=[]; walkOnDone=null;
+  const sp=SPOTS[act.id]||SPOTS.reels; walkPath=[]; walkOnDone=null; waitUntil=0; holdRot=undefined;
   // [수정] 의자 목표 위치는 즉시 배치일 때도 항상 반영 (새로고침 시 캐릭터가 허공에 앉는 문제 방지)
   const isChair=spotForAction(act)==='chair';
   const moveChair=!instant&&isChair;
@@ -3396,6 +3405,22 @@ function placeHero(act,instant){
   if(instant){if(chair){chair.position.set(chairGoal.x,0,chairGoal.z);chair.rotation.y=chairGoal.r;}finish();return;}
   const target=new THREE.Vector3(...sp.pos);
   if(heroPos.distanceTo(target)<0.08&&!moveChair){finish();return;}
+  // [수정] 침대로 갈 때: 침대 옆에서 잠깐 멈춤 → 올라타기 → 가장자리에 앉아 숨 고르기 → 앉은 채 안쪽으로 이동
+  if(isBedPos(target)){
+    const sleepy=sp.anim==='sleep';
+    if(isBedPos(heroPos)){
+      startWalk([KF(target.x,BED_SIT_Y,target.z,{pose:'scoot',rot:sp.rot,speed:0.6,pause:sleepy?0.5:0.15})],finish,true);
+    }else{
+      const tx=-1.75;
+      startWalk([
+        KF(tx,0,0.5,{at:'stand',faceAfter:0,pause:0.9,sayAt:'🛏️ 침대에 올라가볼까...'}),
+        KF(tx,0.5,0.58,{pose:'climb',rot:0,speed:0.8,say:'💪 으차!'}),
+        KF(tx,BED_SIT_Y,0.98,{rot:0,speed:0.8,at:'scoot',sayAt:'😮‍💨 휴~',pause:0.6}),
+        KF(target.x,BED_SIT_Y,target.z,{pose:'scoot',rot:sp.rot,speed:0.6,pause:sleepy?0.5:0.2})
+      ],finish);
+    }
+    return;
+  }
   const path=target.z<-1.55?[new THREE.Vector3(-0.35,0,0.2),new THREE.Vector3(-0.35,0,-1.45),target]:[target];
   startWalk(path,finish);
 }
@@ -3494,23 +3519,38 @@ function tick(now){
     headMesh.material.map = closed ? faceClosed : faceOpen;
     headMesh.material.needsUpdate = true;
   }
+  // [수정] 이동/대기 처리 (키프레임: pose=이동 중 자세, at=도착 후 자세, pause=대기(초), rot=이동 중 방향, faceAfter=도착 후 제자리 회전)
   if(walkPath.length){
-    const g=walkPath[walkIdx],dx=g.x-heroPos.x,dy=g.y-heroPos.y,dz=g.z-heroPos.z,dist=Math.hypot(dx,dy,dz);
-    if(dist<0.04){heroPos.copy(g);walkIdx++;
-      if(walkIdx>=walkPath.length){const cb=walkOnDone;walkPath=[];walkOnDone=null;if(cb)cb();}}
-    else{const step=Math.min(dist,walkSpeed*dt);heroPos.x+=dx/dist*step;heroPos.y+=dy/dist*step;heroPos.z+=dz/dist*step;
-      if(Math.hypot(dx,dz)>0.001)heroRot+=angleDiff(heroRot,Math.atan2(dx,dz))*Math.min(1,dt*14);}
-    hero.position.copy(heroPos); hero.rotation.y=heroRot;
+    if(now<waitUntil){
+      if(holdRot!==undefined)heroRot+=angleDiff(heroRot,holdRot)*Math.min(1,dt*8);
+    }else if(walkIdx>=walkPath.length){
+      const cb=walkOnDone;walkPath=[];walkOnDone=null;waitUntil=0;holdRot=undefined;if(cb)cb();
+    }else{
+      holdRot=undefined;
+      const g=walkPath[walkIdx];
+      if(legIdx!==walkIdx){legIdx=walkIdx;if(g.pose&&heroAnim!==g.pose)setActionPose(g.pose);if(g.say)setBubble(g.say,true);}
+      const dx=g.x-heroPos.x,dy=g.y-heroPos.y,dz=g.z-heroPos.z,dist=Math.hypot(dx,dy,dz);
+      if(dist<0.04){heroPos.copy(g);walkIdx++;
+        if(g.at)setActionPose(g.at);
+        if(g.sayAt)setBubble(g.sayAt,true);
+        if(g.faceAfter!==undefined)holdRot=g.faceAfter;
+        if(g.pause)waitUntil=now+g.pause*1000;}
+      else{const step=Math.min(dist,(g.speed||walkSpeed)*dt);heroPos.x+=dx/dist*step;heroPos.y+=dy/dist*step;heroPos.z+=dz/dist*step;
+        if(g.rot!==undefined)heroRot+=angleDiff(heroRot,g.rot)*Math.min(1,dt*10);
+        else if(Math.hypot(dx,dz)>0.001)heroRot+=angleDiff(heroRot,Math.atan2(dx,dz))*Math.min(1,dt*14);}
+    }
+  }
+  hero.position.copy(heroPos); hero.rotation.y=heroRot;
+  const t=now*0.003;
+  // [수정] 걷는 중에만 다리 스윙 적용. 이동이 끝난 프레임에 앉기 자세를 덮어쓰던 버그 수정
+  if(walkPath.length&&heroAnim==='walk'&&now>=waitUntil){
     const sw=Math.sin(now*0.013)*0.22;
     legL.rotation.x=sw;legR.rotation.x=-sw;
-    // 캐릭터 기준점은 바닥 높이(y=0)에 고정하고, 다리만 교대로 움직인다.
-    hero.position.y=heroPos.y;
     armL.rotation.x=-sw*0.7;armR.rotation.x=sw*0.7;
     body.position.y=0;
   }else{
-    hero.position.copy(heroPos); hero.rotation.y=heroRot;
-    const t=now*0.003;
     if(heroAnim==='reels'){head.rotation.x=0.22+Math.sin(t*0.7)*0.04;armR.rotation.x=-0.95+Math.sin(t*1.6)*0.08;if(phone)phone.rotation.z=Math.sin(t*1.2)*0.06;}
+    else if(heroAnim==='scoot'||heroAnim==='climb'){/* 자세 유지 */}
     else if(heroAnim==='coding'){head.rotation.x=0.25+Math.sin(t*2)*0.03;const k=Math.sin(now*0.022)*0.14;armL.rotation.x=-0.85+k;armR.rotation.x=-0.85-k;}
     else if(heroAnim==='game'){head.rotation.x=0.18;head.rotation.y=Math.sin(t*3)*0.12;const k=Math.sin(now*0.028)*0.18;armL.rotation.x=-0.85+k;armR.rotation.x=-0.85-k;}
     else if(heroAnim==='sleep'){body.position.y=0.22+Math.sin(t*0.8)*0.015;}
