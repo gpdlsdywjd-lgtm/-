@@ -310,9 +310,14 @@
         <span class="hidden sm:inline text-xs font-semibold text-[#7a6e65] border-l border-[#d8cebe] pl-2">방구석 인생 타이쿤</span>
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <button id="bgm-toggle-btn" type="button" aria-pressed="false" class="px-2.5 py-1 rounded-lg bg-white border border-[#b2d264] text-[10px] font-bold text-[#4a6b1e] hover:bg-[#f7fbe9] transition-all flex items-center gap-1 shadow-sm" title="배경음 켜기">
-          <span id="bgm-toggle-icon">🔇</span><span id="bgm-toggle-label">BGM OFF</span>
-        </button>
+        <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-[#d8cebe] shadow-sm">
+          <button id="bgm-toggle-btn" type="button" aria-pressed="true" class="text-[10px] font-bold text-[#4a6b1e] flex items-center gap-1" title="배경음 끄기">
+            <span id="bgm-toggle-icon">🔊</span><span id="bgm-toggle-label">BGM ON</span>
+          </button>
+          <span class="text-[9px] text-[#7a6e65]">음량</span>
+          <input id="bgm-volume" type="range" min="0" max="100" value="35" aria-label="배경음 음량" class="w-14 sm:w-20 h-1 accent-[#85b032] cursor-pointer">
+          <span id="bgm-volume-value" class="text-[9px] text-[#7a6e65] tabular-nums w-7 text-right">35%</span>
+        </div>
         <button id="google-login-btn" type="button" onclick="googleLogin()" class="px-2.5 py-1 rounded-lg bg-white border border-[#d8cebe] text-[10px] font-bold text-[#2b2621] hover:bg-[#f7fbe9] transition-all flex items-center gap-1 shadow-sm">
           <span>🌐</span> <span id="google-login-label">구글 로그인</span>
         </button>
@@ -546,19 +551,26 @@ Object.values(bgmTracks).forEach(audio => {
   audio.preload = "auto";
   audio.volume = 0;
 });
-let bgmEnabled = false;
+let bgmEnabled = true;
+let bgmVolume = 0.35;
 let bgmCurrentTrack = "calm";
 let bgmFadeFrame = 0;
+let bgmWaitingForGesture = false;
 
 function updateBgmButton(){
   const btn = document.getElementById("bgm-toggle-btn");
   const icon = document.getElementById("bgm-toggle-icon");
   const label = document.getElementById("bgm-toggle-label");
-  if(!btn || !icon || !label) return;
-  icon.textContent = bgmEnabled ? "🔊" : "🔇";
-  label.textContent = bgmEnabled ? "BGM ON" : "BGM OFF";
-  btn.setAttribute("aria-pressed", String(bgmEnabled));
-  btn.title = bgmEnabled ? "배경음 끄기" : "배경음 켜기";
+  const volume = document.getElementById("bgm-volume");
+  const volumeValue = document.getElementById("bgm-volume-value");
+  if(btn && icon && label){
+    icon.textContent = bgmEnabled ? "🔊" : "🔇";
+    label.textContent = bgmEnabled ? "BGM ON" : "BGM OFF";
+    btn.setAttribute("aria-pressed", String(bgmEnabled));
+    btn.title = bgmEnabled ? "배경음 끄기" : "배경음 켜기";
+  }
+  if(volume) volume.value = String(Math.round(bgmVolume * 100));
+  if(volumeValue) volumeValue.textContent = Math.round(bgmVolume * 100) + "%";
 }
 
 function switchBgmTrack(trackKey){
@@ -574,31 +586,41 @@ function switchBgmTrack(trackKey){
   const duration = 900;
   const startTime = performance.now();
 
-  incoming.play().catch(err => {
-    console.warn("[bgm] 재생을 시작하지 못했습니다:", err);
+  incoming.play().then(() => {
+    bgmWaitingForGesture = false;
+  }).catch(err => {
+    bgmWaitingForGesture = true;
+    console.warn("[bgm] 브라우저의 자동 재생 제한으로 사용자 입력을 기다립니다:", err);
   });
 
   const fade = now => {
     const progress = Math.min(1, (now - startTime) / duration);
-    incoming.volume = Math.min(1, startIncoming + (1 - startIncoming) * progress);
+    incoming.volume = Math.min(bgmVolume, startIncoming + (bgmVolume - startIncoming) * progress);
     outgoing.volume = Math.max(0, startOutgoing * (1 - progress));
     if(progress < 1){
       bgmFadeFrame = requestAnimationFrame(fade);
     }else{
       outgoing.pause();
       outgoing.volume = 0;
-      incoming.volume = 1;
+      incoming.volume = bgmVolume;
       bgmFadeFrame = 0;
     }
   };
   bgmFadeFrame = requestAnimationFrame(fade);
 }
 
+function resumeBgmAfterGesture(event){
+  if(!bgmEnabled || !bgmWaitingForGesture) return;
+  if(event && event.target && event.target.closest &&
+     event.target.closest("#bgm-toggle-btn, #bgm-volume")) return;
+  switchBgmTrack(bgmCurrentTrack || "calm");
+}
+
 function toggleBgm(){
   bgmEnabled = !bgmEnabled;
   if(bgmEnabled){
     updateBgmButton();
-    switchBgmTrack(bgmCurrentTrack);
+    switchBgmTrack(bgmCurrentTrack || "calm");
   }else{
     if(bgmFadeFrame) cancelAnimationFrame(bgmFadeFrame);
     bgmFadeFrame = 0;
@@ -606,9 +628,28 @@ function toggleBgm(){
       audio.pause();
       audio.volume = 0;
     });
+    bgmWaitingForGesture = false;
     updateBgmButton();
   }
 }
+
+function setBgmVolume(value){
+  const parsed = Number(value);
+  if(!Number.isFinite(parsed)) return;
+  bgmVolume = Math.max(0, Math.min(1, parsed / 100));
+  if(bgmEnabled){
+    const active = bgmTracks[bgmCurrentTrack || "calm"];
+    if(active && !active.paused) active.volume = bgmVolume;
+  }
+  updateBgmButton();
+}
+
+window.addEventListener("pointerdown", resumeBgmAfterGesture, true);
+window.addEventListener("keydown", resumeBgmAfterGesture, true);
+window.addEventListener("pageshow", () => {
+  if(bgmEnabled) switchBgmTrack(bgmCurrentTrack || "calm");
+});
+
 
 const GOOGLE_CLIENT_ID = "620851573028-6ltomdpn8doa2juekfima0hcm0h5da27.apps.googleusercontent.com";
 const ACTIVE_USER_KEY = "lime-coding-tycoon-active-user";
@@ -2047,8 +2088,13 @@ document.addEventListener("visibilitychange", ()=>{
 
 document.addEventListener("DOMContentLoaded",()=>{
   const bgmToggleBtn = document.getElementById("bgm-toggle-btn");
+  const bgmVolume = document.getElementById("bgm-volume");
   if(bgmToggleBtn) bgmToggleBtn.addEventListener("click", toggleBgm);
+  if(bgmVolume) bgmVolume.addEventListener("input", event => setBgmVolume(event.target.value));
   updateBgmButton();
+  // 첫 화면에서는 피아노 BGM을 자동 재생 시도한다.
+  // 브라우저가 자동 재생을 차단하면 첫 화면의 사용자 입력 직후 재생을 다시 시도한다.
+  switchBgmTrack("calm");
   initGoogleAuth();
   applyCosmetics();
   renderActions();
