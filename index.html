@@ -8,7 +8,6 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
   :root{
     --bg:#f5f2eb; --ink:#2b2621; --muted:#7a6e65; --lime:#85b032;
@@ -304,20 +303,20 @@
 <div id="app" class="w-full min-h-screen max-w-6xl mx-auto p-2 sm:p-4 flex flex-col justify-between">
 
   <header class="bg-[#fffdf9] border-2 border-[#cfc4b2] shadow-[2px_2px_0_#d8cebe] p-2 sm:p-2.5 mb-1.5 rounded-xl w-full shrink-0">
-    <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 mb-2">
-      <div class="flex items-center gap-2 min-w-0 shrink-0">
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <div class="flex items-center gap-2 min-w-0">
         <span class="text-[#85b032] text-lg sm:text-xl animate-pulse shrink-0">●</span>
         <h1 class="text-lg sm:text-xl font-extrabold tracking-wide truncate">라임</h1>
         <span class="hidden sm:inline text-xs font-semibold text-[#7a6e65] border-l border-[#d8cebe] pl-2">방구석 인생 타이쿤</span>
       </div>
-      <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 ml-auto">
+      <div class="flex items-center gap-2 shrink-0">
         <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-[#d8cebe] shadow-sm">
           <button id="bgm-toggle-btn" type="button" aria-pressed="true" class="text-[10px] font-bold text-[#4a6b1e] flex items-center gap-1" title="배경음 끄기">
-            <span id="bgm-toggle-icon">🔊</span><span id="bgm-toggle-label" class="hidden sm:inline">BGM ON</span>
+            <span id="bgm-toggle-icon">🔊</span><span id="bgm-toggle-label">BGM ON</span>
           </button>
-          <span class="hidden sm:inline text-[9px] text-[#7a6e65]">음량</span>
-          <input id="bgm-volume" type="range" min="0" max="100" value="35" aria-label="배경음 음량" class="w-12 sm:w-20 h-1 accent-[#85b032] cursor-pointer">
-          <span id="bgm-volume-value" class="hidden sm:inline text-[9px] text-[#7a6e65] tabular-nums w-7 text-right">35%</span>
+          <span class="text-[9px] text-[#7a6e65]">음량</span>
+          <input id="bgm-volume" type="range" min="0" max="100" value="35" aria-label="배경음 음량" class="w-14 sm:w-20 h-1 accent-[#85b032] cursor-pointer">
+          <span id="bgm-volume-value" class="text-[9px] text-[#7a6e65] tabular-nums w-7 text-right">35%</span>
         </div>
         <button id="google-login-btn" type="button" onclick="googleLogin()" class="px-2.5 py-1 rounded-lg bg-white border border-[#d8cebe] text-[10px] font-bold text-[#2b2621] hover:bg-[#f7fbe9] transition-all flex items-center gap-1 shadow-sm">
           <span>🌐</span> <span id="google-login-label">구글 로그인</span>
@@ -421,9 +420,9 @@
         </div>
 
         <aside class="todo-vertical-pane">
-          <div class="dock-heading flex-wrap">
-            <div class="flex items-center gap-1.5 min-w-0 shrink-0">
-              <span class="whitespace-nowrap">📅 투두리스트</span>
+          <div class="dock-heading">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span>📅 투두리스트</span>
               <span id="tm-selected-date-label" class="text-[11px] font-extrabold text-[#4a6b1e] bg-[#eef4e2] px-2 py-0.5 rounded-md">오늘</span>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
@@ -549,13 +548,11 @@ const bgmTracks = {
 };
 Object.values(bgmTracks).forEach(audio => {
   audio.loop = true;
-  audio.preload = audio === bgmTracks.calm ? "auto" : "none";
+  audio.preload = "auto";
   audio.volume = 0;
 });
 let bgmEnabled = true;
 let bgmVolume = 0.35;
-try{const sv=JSON.parse(localStorage.getItem("lime-bgm-settings")||"null");if(sv){bgmEnabled=sv.on!==false;if(Number.isFinite(sv.vol))bgmVolume=Math.max(0,Math.min(1,sv.vol));}}catch(e){}
-function saveBgmSettings(){try{localStorage.setItem("lime-bgm-settings",JSON.stringify({on:bgmEnabled,vol:bgmVolume}));}catch(e){}}
 let bgmCurrentTrack = "calm";
 let bgmFadeFrame = 0;
 let bgmWaitingForGesture = false;
@@ -597,9 +594,9 @@ function switchBgmTrack(trackKey){
   });
 
   const fade = now => {
-    const progress = Math.max(0, Math.min(1, (now - startTime) / duration));
-    incoming.volume = Math.max(0, Math.min(1, startIncoming + (bgmVolume - startIncoming) * progress));
-    outgoing.volume = Math.max(0, Math.min(1, startOutgoing * (1 - progress)));
+    const progress = Math.min(1, (now - startTime) / duration);
+    incoming.volume = Math.min(bgmVolume, startIncoming + (bgmVolume - startIncoming) * progress);
+    outgoing.volume = Math.max(0, startOutgoing * (1 - progress));
     if(progress < 1){
       bgmFadeFrame = requestAnimationFrame(fade);
     }else{
@@ -621,7 +618,6 @@ function resumeBgmAfterGesture(event){
 
 function toggleBgm(){
   bgmEnabled = !bgmEnabled;
-  saveBgmSettings();
   if(bgmEnabled){
     updateBgmButton();
     switchBgmTrack(bgmCurrentTrack || "calm");
@@ -641,7 +637,6 @@ function setBgmVolume(value){
   const parsed = Number(value);
   if(!Number.isFinite(parsed)) return;
   bgmVolume = Math.max(0, Math.min(1, parsed / 100));
-  saveBgmSettings();
   if(bgmEnabled){
     const active = bgmTracks[bgmCurrentTrack || "calm"];
     if(active && !active.paused) active.volume = bgmVolume;
@@ -653,16 +648,6 @@ window.addEventListener("pointerdown", resumeBgmAfterGesture, true);
 window.addEventListener("keydown", resumeBgmAfterGesture, true);
 window.addEventListener("pageshow", () => {
   if(bgmEnabled) switchBgmTrack(bgmCurrentTrack || "calm");
-});
-// 다른 앱으로 가거나 화면이 꺼지면 음악 정지, 돌아오면 이어서 재생
-document.addEventListener("visibilitychange", () => {
-  if(document.hidden){
-    if(bgmFadeFrame) cancelAnimationFrame(bgmFadeFrame);
-    bgmFadeFrame = 0;
-    Object.values(bgmTracks).forEach(a => a.pause());
-  }else if(bgmEnabled){
-    switchBgmTrack(bgmCurrentTrack || "calm");
-  }
 });
 
 
@@ -681,9 +666,6 @@ const firebaseConfig = {
 };
 
 let db = null;
-let fbAuth = null;
-let authRestored = Promise.resolve(null);
-let needRelogin = false;
 let firestoreUnsub = null;
 let isApplyingRemote = false;
 let isCloudReady = false;
@@ -697,33 +679,12 @@ try{
   if(window.firebase && firebase.firestore){
     db = firebase.firestore();
   }
-  if(window.firebase && firebase.auth){
-    fbAuth = firebase.auth();
-    // 새로고침 후 저장된 Firebase 로그인 세션이 복원될 때까지 기다리기 위한 약속
-    authRestored = new Promise(res=>{const off=fbAuth.onAuthStateChanged(u=>{off();res(u);});});
-  }
 }catch(e){
   console.warn("[firestore] 초기화 실패:", e);
 }
 
 let currentGoogleUser = null;
 let googleTokenClient = null;
-
-// 클라우드 읽기/쓰기는 Firebase 인증이 된 상태에서만 (Firestore 규칙이 본인 문서만 허용)
-function cloudAllowed(){
-  return !!(db && fbAuth && fbAuth.currentUser && currentGoogleUser && currentGoogleUser.id);
-}
-async function firebaseSignIn(accessToken){
-  if(!fbAuth || !window.firebase || !firebase.auth) return false;
-  try{
-    await fbAuth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(null, accessToken));
-    needRelogin = false;
-    return true;
-  }catch(e){
-    console.warn("[auth] Firebase 인증 실패:", e);
-    return false;
-  }
-}
 
 function getStorageKey(){
   if(currentGoogleUser && currentGoogleUser.id){
@@ -744,7 +705,7 @@ function updateGoogleLoginUI(){
   const btnEl = document.getElementById("google-login-btn");
   if(!labelEl || !btnEl) return;
   if(currentGoogleUser && currentGoogleUser.name){
-    labelEl.textContent = currentGoogleUser.name + (needRelogin ? " (다시 로그인 필요)" : (isCloudReady ? " (동기화됨)" : " (불러오는 중)"));
+    labelEl.textContent = currentGoogleUser.name + (isCloudReady ? " (동기화됨)" : " (불러오는 중)");
     btnEl.title = (currentGoogleUser.email || "") + " · 클릭하면 계정 전환";
   }else{
     labelEl.textContent = "구글 로그인";
@@ -768,7 +729,7 @@ function subscribeFirestore(){
     try{ firestoreUnsub(); }catch(e){}
     firestoreUnsub = null;
   }
-  if(!cloudAllowed()) return;
+  if(!db || !currentGoogleUser || !currentGoogleUser.id) return;
   const docId = getFirestoreDocId();
   firestoreUnsub = db.collection("gameSaves").doc(docId).onSnapshot(docSnap=>{
     if(!docSnap.exists) return;
@@ -795,7 +756,7 @@ function subscribeFirestore(){
 }
 
 async function syncFromFirestoreOnce(){
-  if(!cloudAllowed()){
+  if(!db || !currentGoogleUser || !currentGoogleUser.id){
     isCloudReady = true;
     updateGoogleLoginUI();
     return;
@@ -847,8 +808,8 @@ function flushFirestoreSave(){
     clearTimeout(cloudSaveTimer);
     cloudSaveTimer = null;
   }
-  if(isApplyingRemote) return;
-  if(!cloudAllowed()) return;
+  if(!db || isApplyingRemote) return;
+  if(!currentGoogleUser || !currentGoogleUser.id) return;
   if(!isCloudReady) return;
   hasPendingCloudSave = false;
   const docId = getFirestoreDocId();
@@ -860,16 +821,18 @@ function flushFirestoreSave(){
   const cleanState = JSON.parse(JSON.stringify(S));
   db.collection("gameSaves").doc(docId).set({
     userId: currentGoogleUser.id,
+    userName: currentGoogleUser.name || "",
+    userEmail: currentGoogleUser.email || "",
     state: cleanState,
     updatedAt: nowTs
-  }).catch(err=>{
+  }, { merge: true }).catch(err=>{
     console.warn("[firestore] 저장 오류:", err);
   });
 }
 
 function scheduleFirestoreSave(immediate){
-  if(isApplyingRemote) return;
-  if(!cloudAllowed()) return;
+  if(!db || isApplyingRemote) return;
+  if(!currentGoogleUser || !currentGoogleUser.id) return;
   if(!isCloudReady) return;
   hasPendingCloudSave = true;
   if(immediate){
@@ -892,13 +855,7 @@ function initGoogleAuth(){
   if(currentGoogleUser && currentGoogleUser.id){
     S = load();
     refreshAllViewsFromState();
-    isCloudReady = false;
-    updateGoogleLoginUI();
-    authRestored.then(u=>{
-      // 이전 버전에서 로그인했거나 세션이 만료되면 구글 로그인을 한 번 더 눌러야 동기화됨 (로컬 저장은 계속 동작)
-      if(!u) needRelogin = true;
-      syncFromFirestoreOnce();
-    });
+    syncFromFirestoreOnce();
   }else{
     isCloudReady = true;
     updateGoogleLoginUI();
@@ -941,9 +898,8 @@ function initGoogleAuth(){
             S.lastTick = Date.now();
             updateGoogleLoginUI();
             refreshAllViewsFromState();
-            const authed = await firebaseSignIn(tokenResponse.access_token);
             await syncFromFirestoreOnce();
-            showFloat(authed ? (userInfo.name + " 계정으로 동기화되었습니다.") : "로그인은 됐지만 클라우드 인증에 실패했어요. 이 기기에만 저장됩니다.");
+            showFloat(userInfo.name + " 계정으로 동기화되었습니다.");
           }catch(err){
             showFloat("사용자 정보를 불러오는 중 오류가 발생했습니다.");
           }
@@ -1196,7 +1152,7 @@ function tickStockMarket(){
     S.stocks.candles[st.id].push({o:openPrice,c:closePrice,h:highPrice,l:lowPrice});
     if(S.stocks.candles[st.id].length>12)S.stocks.candles[st.id].shift();
   });
-  save(true); // 주가 변동은 기기마다 따로 굴러가므로 클라우드에 매번 올리지 않음 (무료 쓰기 한도 보호)
+  save();
   if(currentOpenTab==="stock"||currentOpenTab==="media")openPanel(currentOpenTab);
 }
 window.tickStockMarket=tickStockMarket;
@@ -2107,7 +2063,7 @@ setInterval(()=>{
   }
 
   save(true);
-  if(now - lastCloudTickSave >= 60000 && !document.hidden){
+  if(now - lastCloudTickSave >= 15000){
     lastCloudTickSave = now;
     scheduleFirestoreSave(false);
   }
@@ -2546,7 +2502,7 @@ window.LimeGame={get S(){return S;},ACTIONS:ACTIONS,setAction:setAction,showFloa
   .r3-menu button.on{background:#85b032;color:#fff;border-color:#739b28}
   .r3-menu button i{font-style:normal;font-size:9px;opacity:.85}
   .r3-menu button span{display:block;font-size:9.5px;font-weight:700;opacity:.7;margin-top:1px}
-  #r3-nightbg{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;border-radius:inherit;transition:opacity 1.5s ease;
+  #r3-nightbg{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0;border-radius:inherit;
     background:linear-gradient(180deg,rgba(10,12,34,.92),rgba(22,20,48,.8))}
   .r3-light{position:absolute;right:40px;top:112px;pointer-events:auto;height:26px;padding:0 9px;border-radius:999px;background:rgba(255,255,255,.85);
     border:1.5px solid #2b2621;font-size:11px;font-weight:900;color:#2b2621;white-space:nowrap;font-variant-numeric:tabular-nums}
@@ -2578,7 +2534,6 @@ try{init();}catch(e){
 function init(){
 host.classList.add('room3d-on');
 const canvas=document.createElement('canvas'); canvas.id='room3d-canvas'; host.insertBefore(canvas,host.firstChild);
-const nightBgEl=document.createElement('div'); nightBgEl.id='r3-nightbg'; host.insertBefore(nightBgEl,canvas);
 const ui=document.createElement('div'); ui.id='room3d-ui';
 ui.innerHTML='<div id="r3-bubble" class="r3-bubble"></div><div id="r3-tag" class="r3-tag"></div><div id="r3-menu" class="r3-menu"></div><button type="button" id="r3-reset" class="r3-reset" title="시점 초기화">↺</button>';
 host.appendChild(ui);
@@ -3396,55 +3351,17 @@ function spotForAction(a){return a&&(a.spot||(SPOTS[a.id]&&SPOTS[a.id].spot))||n
 
 let curAction=null, walkPath=[], walkIdx=0, walkOnDone=null, waitUntil=0, holdRot=undefined, legIdx=-1, heroPos=new THREE.Vector3(-1.35,0,0.1), heroRot=0.45, heroAnim='reels', walkSpeed=3.2;
 let timeMode='auto', lastSkyKey='', lastLampOn=null, lastScreenGlow=null, lastLedHue=null, menuOpen=false;
-const lp=new THREE.Vector3(), tintC=new THREE.Color();
+const lp=new THREE.Vector3();
 
-let lastRoomKey='', lastLightCheck=0;
-function applyRoomSkin(now){
-  const est=G.S.currentEstate||'semi_basement', key=est+'|'+curSkinId();
-  if(key!==lastRoomKey){
-    lastRoomKey=key;
-    const s=skinFor(est,curSkinId());
-    if(!curSkin||curSkin.key!==s.key){buildRoom(s);lastSkyKey='';lastLampOn=null;lastScreenGlow=null;lastLedHue=null;refreshScreen();if(curAction)placeHero(curAction,true);}
-    applyLighting(curSkin); lastLightCheck=now||0; return;
-  }
-  if(!now||now-lastLightCheck>1000){lastLightCheck=now||0;applyLighting(curSkin);}
+function applyRoomSkin(){
+  const s=skinFor(G.S.currentEstate||'semi_basement',curSkinId());
+  if(!curSkin||curSkin.key!==s.key){buildRoom(s);lastSkyKey='';lastLampOn=null;lastScreenGlow=null;lastLedHue=null;refreshScreen();if(curAction)placeHero(curAction,true);}
+  applyLighting(s);
 }
-// 위치(기본: 공주) 기준 오늘의 일출·일몰 계산 (NOAA 근사식, 오차 1~2분)
-const LOC_KEY='lime-room3d-loc';
-let roomLoc={lat:36.4466,lng:127.1190,name:'공주'};
-try{const v=JSON.parse(localStorage.getItem(LOC_KEY)||'null');if(v&&isFinite(v.lat)&&isFinite(v.lng))roomLoc=v;}catch(e){}
-try{const tm=localStorage.getItem('lime-room3d-light');if(tm==='day'||tm==='night'||tm==='auto')timeMode=tm;}catch(e){}
-let sunCache={k:'',rise:360,set:1140,polar:null};
-function sunTimes(d){
-  const k=d.toDateString()+'|'+roomLoc.lat+'|'+roomLoc.lng;
-  if(sunCache.k===k) return sunCache;
-  const rad=Math.PI/180, n=Math.floor((d-new Date(d.getFullYear(),0,0))/864e5), g=2*Math.PI/365*(n-1);
-  const eqt=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g));
-  const dec=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
-  const cosH=Math.cos(90.833*rad)/(Math.cos(roomLoc.lat*rad)*Math.cos(dec))-Math.tan(roomLoc.lat*rad)*Math.tan(dec);
-  const tz=-d.getTimezoneOffset();
-  sunCache={k,polar:cosH>1?'night':(cosH<-1?'day':null),rise:360,set:1140};
-  if(!sunCache.polar){const ha=Math.acos(cosH)/rad;sunCache.rise=720-4*(roomLoc.lng+ha)-eqt+tz;sunCache.set=720-4*(roomLoc.lng-ha)-eqt+tz;}
-  return sunCache;
-}
-function fmtMin(m){m=((Math.round(m)%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');}
 function isNightNow(){
   if(timeMode==='night') return true;
   if(timeMode==='day') return false;
-  const d=new Date(), st=sunTimes(d);
-  if(st.polar) return st.polar==='night';
-  const m=d.getHours()*60+d.getMinutes();
-  return m<st.rise||m>=st.set;
-}
-function setRoomLocation(){
-  if(!navigator.geolocation){G.showFloat('📍 이 기기에서는 위치를 쓸 수 없어요');return;}
-  G.showFloat('📍 위치 확인 중...');
-  navigator.geolocation.getCurrentPosition(p=>{
-    roomLoc={lat:+p.coords.latitude.toFixed(3),lng:+p.coords.longitude.toFixed(3),name:'현재 위치'};
-    try{localStorage.setItem(LOC_KEY,JSON.stringify(roomLoc));}catch(e){}
-    applyLighting(); const st=sunTimes(new Date());
-    G.showFloat('📍 위치 저장 · 일출 '+fmtMin(st.rise)+' / 일몰 '+fmtMin(st.set));
-  },()=>G.showFloat('📍 위치 권한이 거부됐어요 (공주 기준 유지)'),{timeout:10000,maximumAge:3600000});
+  const h=new Date().getHours(); return h>=19||h<6;
 }
 function applyLighting(s){
   s=s||curSkin; if(!s) return;
@@ -3459,13 +3376,13 @@ function applyLighting(s){
     if(lampLight) lampLight.intensity=lampOn?(1.4*(l.lampMul==null?1:l.lampMul)):0;}
   const mul=(l.mul==null?1:l.mul)*(night?0.52:1), wm=l.winMul==null?1:l.winMul;
   hemi.intensity=0.95*mul; sun.intensity=(night?0.25:1.35)*wm*mul; fill.intensity=(night?0.3:0.42)*mul;
-  if(l.tint!=null&&l.tintAmt){tintC.setHex(l.tint);hemi.color.setHex(0xfffaf0).lerp(tintC,l.tintAmt);sun.color.setHex(0xfff4dc).lerp(tintC,l.tintAmt*0.7);}
+  if(l.tint!=null&&l.tintAmt){hemi.color.setHex(0xfffaf0).lerp(new THREE.Color(l.tint),l.tintAmt);sun.color.setHex(0xfff4dc).lerp(new THREE.Color(l.tint),l.tintAmt*0.7);}
   else{hemi.color.setHex(0xfffaf0);sun.color.setHex(0xfff4dc);}
   const sg=curAction&&curAction.id==='game'?0.9:(curAction&&spotForAction(curAction)==='chair'?0.45:(l.screenBase||0));
   if(sg!==lastScreenGlow){lastScreenGlow=sg;if(screenGlow)screenGlow.intensity=sg;}
   const hue=curAction&&curAction.id==='game'?0.08:(curAction&&spotForAction(curAction)==='chair'?0.33:(s.pc&&s.pc.ledHue!=null?s.pc.ledHue:0.55));
   if(pcLed&&hue!==lastLedHue){lastLedHue=hue;pcLed.material.color.setHSL(hue,0.9,0.6);pcLed.material.needsUpdate=true;}
-  const nbg=document.getElementById('r3-nightbg'); if(nbg) nbg.style.opacity=night?'0.85':'0';
+  const nbg=document.getElementById('r3-nightbg'); if(nbg) nbg.style.opacity=night?'1':'0';
 }
 
 function setBubble(txt,chip){
@@ -3553,7 +3470,16 @@ function syncAction(){
   if(!same){placeHero(a,false);}
   else{applyLighting();refreshScreen();}
 }
-// 행동 변경은 메인 스크립트의 setAction(저장·클라우드 동기화 포함)을 그대로 쓰고, lime:action 이벤트로 캐릭터를 움직인다
+G.setAction=function(id,skipSave){
+  const a=G.ACTIONS.find(x=>x.id===id)||G.ACTIONS[0];
+  G.S.action=a.id; curAction=a;
+  const av=document.getElementById('char-avatar'),bg=document.getElementById('char-badge'),dc=document.getElementById('dock-current-action');
+  if(av)av.textContent=a.avatar; if(bg)bg.textContent=a.badge; if(dc)dc.textContent=a.name;
+  document.querySelectorAll('#action-btns button').forEach(b=>b.classList.toggle('selected',b.textContent.indexOf(a.name)===0));
+  if(!skipSave)try{localStorage.setItem('lime-coding-tycoon-v87',JSON.stringify(G.S));}catch(e){}
+  // [수정] 여기에 있던 옷장 자동 열림(wardOpenUntil) 코드 제거
+  placeHero(a,false);
+};
 window.addEventListener('lime:action',syncAction);
 curAction=G.ACTIONS.find(x=>x.id===G.S.action)||G.ACTIONS[0];
 applyRoomSkin(); placeHero(curAction,true);
@@ -3585,17 +3511,14 @@ function openHeroMenu(x,y){
   showMenu(x,y,'<div class="r3-menu-title">🧑 내 캐릭터</div><div class="r3-menu-info">Lv.'+(s.level||1)+' · '+a.avatar+' '+a.name+'<br>멘탈 '+Math.round(s.mental||0)+' · 체력 '+Math.round(s.stamina||0)+'</div><button type="button" data-act="walk">👟 방 안에서 산책하기<span>멘탈 +8 · 체력 -5</span></button>');
 }
 function openWindowMenu(x,y){
-  const m=timeMode==='auto'?'자동':(timeMode==='day'?'낮':'밤'), st=sunTimes(new Date());
-  const info=st.polar?(st.polar==='night'?'극야':'백야'):('일출 '+fmtMin(st.rise)+' · 일몰 '+fmtMin(st.set));
-  showMenu(x,y,'<div class="r3-menu-title">🪟 창밖 시간대 ('+m+')</div><div class="r3-menu-info">📍 '+(roomLoc.name||'설정 위치')+' · '+info+'</div>'+
-    ['auto','day','night'].map(v=>'<button type="button" data-tm="'+v+'" class="'+(timeMode===v?'on':'')+'">'+(v==='auto'?'🕒 자동 (실제 일출·일몰)':(v==='day'?'☀️ 낮':'🌙 밤'))+'</button>').join('')+
-    '<button type="button" data-loc="1">📍 현재 위치로 맞추기<span>위치는 이 기기에만 저장돼요</span></button>');
+  const m=timeMode==='auto'?'자동':(timeMode==='day'?'낮':'밤');
+  showMenu(x,y,'<div class="r3-menu-title">🪟 창밖 시간대 ('+m+')</div>'+
+    ['auto','day','night'].map(v=>'<button type="button" data-tm="'+v+'" class="'+(timeMode===v?'on':'')+'">'+(v==='auto'?'🕒 자동 (현실 시간)':(v==='day'?'☀️ 낮':'🌙 밤'))+'</button>').join(''));
 }
 menuEl.addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b) return;
   if(b.dataset.act){G.setAction(b.dataset.act);hideMenu();}
-  else if(b.dataset.tm){timeMode=b.dataset.tm;try{localStorage.setItem('lime-room3d-light',timeMode);}catch(e){}applyLighting();hideMenu();}
-  else if(b.dataset.loc){hideMenu();setRoomLocation();}
+  else if(b.dataset.tm){timeMode=b.dataset.tm;applyLighting();hideMenu();}
 });
 
 let downPos=null,hoverKey=null;
@@ -3628,7 +3551,7 @@ function angleDiff(a,b){let d=(b-a+Math.PI)%(Math.PI*2);if(d<0)d+=Math.PI*2;retu
 function tick(now){
   requestAnimationFrame(tick);
   const dt=Math.min(0.05,(now-last)/1000); last=now;
-  applyRoomSkin(now);
+  applyRoomSkin();
   if(now>blinkAt){blinkEnd=now+140;blinkAt=now+2400+Math.random()*2600;}
   const closed=now<blinkEnd||heroAnim==='sleep';
   if (headMesh && headMesh.material && headMesh.material.map !== (closed ? faceClosed : faceOpen)) {
