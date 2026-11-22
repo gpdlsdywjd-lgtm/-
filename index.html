@@ -748,15 +748,16 @@ function cloudAllowed(){
 }
 // idToken: One Tap(자격 증명 JWT) / accessToken: 버튼 로그인(OAuth 토큰) — 둘 중 하나만 넘기면 된다
 async function firebaseSignIn(idToken, accessToken){
-  if(!fbAuth || !window.firebase || !firebase.auth) return false;
-  try{
-    await fbAuth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(idToken || null, accessToken || null));
-    needRelogin = false;
-    return true;
-  }catch(e){
-    console.warn("[auth] Firebase 인증 실패:", e);
-    return false;
-  }
+if(!fbAuth || !window.firebase || !firebase.auth) return false;
+try{
+const cred = firebase.auth.GoogleAuthProvider.credential(idToken || null, accessToken || null);
+await fbAuth.signInWithCredential(cred);
+needRelogin = false;
+return true;
+}catch(e){
+console.warn("[auth] Firebase 인증 실패:", e.code || "", e.message || e);
+return false;
+}
 }
 
 function parseJwt(token){
