@@ -1857,81 +1857,166 @@ function closePanel(){
   currentOpenTab=null;
 }
 
-window.takeLoan = function(amount, interest, name){
-  if(name==='청년 소액대출' && S.creditScore < 600){ showFloat("❌ 신용점수 600점 이상만 가능합니다!"); return; }
-  if(name==='마이너스 통장' && S.creditScore < 750){ showFloat("❌ 신용점수 750점 이상만 가능합니다!"); return; }
+const LOAN_PRODUCTS = {
+  small: { id: "small", name: "청년 소액대출", principal: 50, interestRate: 3, minCredit: 600 },
+  minus: { id: "minus", name: "방구석 마이너스 통장", principal: 150, interestRate: 10, minCredit: 750 }
+};
 
-  S.gold += amount;
-  if(!Array.isArray(S.loans)) S.loans = [];
-  S.loans.push({ principal: amount, interestRate: interest, name: name, takenAt: Date.now() });
+function isPositiveInt(val) {
+  return typeof val === "number" && Number.isSafeInteger(val) && val > 0;
+}
+
+function sanitizeGameNumbers() {
+  if (!Number.isFinite(S.gold)) S.gold = 0;
+  S.gold = Math.trunc(S.gold);
+  if (!Number.isFinite(S.creditScore)) S.creditScore = 850;
+  S.creditScore = clamp(Math.round(S.creditScore), 300, 1000);
+}
+
+window.takeLoan = function(productKeyOrName, legacyAmount, legacyInterest) {
+  sanitizeGameNumbers();
+  const prod =
+    LOAN_PRODUCTS[productKeyOrName] ||
+    Object.values(LOAN_PRODUCTS).find(p => p.name === productKeyOrName) ||
+    Object.values(LOAN_PRODUCTS).find(p => p.principal === legacyAmount && p.interestRate === legacyInterest);
+
+  if (!prod) {
+    showFloat("❌ 허용되지 않은 대출 상품입니다!");
+    return;
+  }
+  if (S.creditScore < prod.minCredit) {
+    showFloat(`❌ 신용점수 ${prod.minCredit}점 이상만 가능합니다!`);
+    return;
+  }
+  if (!Array.isArray(S.loans)) S.loans = [];
+  if (S.loans.length >= 10) {
+    showFloat("❌ 동시에 진행할 수 있는 대출 한도를 초과했습니다!");
+    return;
+  }
+
+  S.gold += prod.principal;
+  S.loans.push({
+    productId: prod.id,
+    principal: prod.principal,
+    interestRate: prod.interestRate,
+    name: prod.name,
+    takenAt: Date.now()
+  });
   save();
   updateHUD();
   openPanel("shop");
-  showFloat(`💳 ${name} 실행 완료! (+${amount}🍋 확보)`);
+  showFloat(`💳 ${prod.name} 실행 완료! (+${prod.principal}🍋 확보)`);
 };
 
-window.repayLoan = function(index){
+window.repayLoan = function(index) {
+  sanitizeGameNumbers();
+  if (!Array.isArray(S.loans) || !Number.isInteger(index) || index < 0 || index >= S.loans.length) {
+    return;
+  }
   const loan = S.loans[index];
-  if(!loan) return;
-  if(S.gold < loan.principal){
+  if (!loan || !isPositiveInt(loan.principal)) return;
+  if (S.gold < loan.principal) {
     showFloat(`❌ 원금 상환에 필요한 라임이 부족합니다! (${loan.principal}🍋 필요)`);
     return;
   }
   S.gold -= loan.principal;
   S.loans.splice(index, 1);
-  const heldLong = Date.now()-(loan.takenAt||0) >= 3*60000;
-  if(heldLong) S.creditScore = clamp(S.creditScore + 15, 300, 1000);
+  const heldLong = Date.now() - (loan.takenAt || 0) >= 3 * 60000;
+  if (heldLong) S.creditScore = clamp(S.creditScore + 15, 300, 1000);
   save();
   updateHUD();
   openPanel("shop");
-  showFloat(heldLong?`✨ ${loan.name} 원금 상환 완료! (신용점수 +15점 상승)`:`✨ ${loan.name} 상환 완료 (3분 미만 보유는 신용점수 변동 없음)`);
+  showFloat(heldLong ? `✨ ${loan.name} 원금 상환 완료! (신용점수 +15점 상승)` : `✨ ${loan.name} 상환 완료 (3분 미만 보유는 신용점수 변동 없음)`);
 };
 
-window.equipEstate=function(id){
-  S.currentEstate=id;
+window.equipEstate = function(id) {
+  S.currentEstate = id;
   save();
   applyCosmetics();
   openPanel("shop");
 };
-window.buyEstate=function(id,price){
-  if(S.gold<price){showFloat("🍋 라임이 부족합니다!");return;}
-  S.gold-=price;
-  if(!S.ownedRealEstate)S.ownedRealEstate=["semi_basement"];
-  S.ownedRealEstate.push(id);
-  S.currentEstate=id;
+
+window.buyEstate = function(id) {
+  sanitizeGameNumbers();
+  const est = REAL_ESTATE_ITEMS.find(x => x.id === id);
+  if (!est || !isPositiveInt(est.price)) {
+    showFloat("❌ 올바르지 않은 부동산 상품입니다!");
+    return;
+  }
+  if (!Array.isArray(S.ownedRealEstate)) S.ownedRealEstate = ["semi_basement"];
+  if (S.ownedRealEstate.includes(est.id)) {
+    window.equipEstate(est.id);
+    return;
+  }
+  if (S.gold < est.price) {
+    showFloat("🍋 라임이 부족합니다!");
+    return;
+  }
+  S.gold -= est.price;
+  S.ownedRealEstate.push(est.id);
+  S.currentEstate = est.id;
   save();
   applyCosmetics();
   openPanel("shop");
   updateHUD();
 };
-window.equipSkin=function(id){
-  if(id!=="default"&&!(S.ownedSkins||[]).includes(id)){showFloat("먼저 스킨을 구매해 주세요!");return;}
-  if(!S.estateSkins||typeof S.estateSkins!=="object")S.estateSkins={};
-  S.estateSkins[S.currentEstate]=id;
+
+window.equipSkin = function(id) {
+  if (id !== "default" && !(S.ownedSkins || []).includes(id)) { showFloat("먼저 스킨을 구매해 주세요!"); return; }
+  if (!S.estateSkins || typeof S.estateSkins !== "object") S.estateSkins = {};
+  S.estateSkins[S.currentEstate] = id;
   save(); applyCosmetics(); openPanel("shop");
-  const it=ROOM_SKIN_ITEMS.find(x=>x.id===id); if(it)showFloat(`🎨 ${it.name} 적용!`);
+  const it = ROOM_SKIN_ITEMS.find(x => x.id === id); if (it) showFloat(`🎨 ${it.name} 적용!`);
 };
-window.buySkin=function(id,price){
-  const it=ROOM_SKIN_ITEMS.find(x=>x.id===id); if(!it)return;
-  if((S.ownedSkins||[]).includes(id)){equipSkin(id);return;}
-  if(S.gold<price){showFloat("🍋 라임이 부족합니다!");return;}
-  S.gold-=price;
-  if(!Array.isArray(S.ownedSkins))S.ownedSkins=["default"];
-  S.ownedSkins.push(id);
+
+window.buySkin = function(id) {
+  sanitizeGameNumbers();
+  const it = ROOM_SKIN_ITEMS.find(x => x.id === id);
+  if (!it) {
+    showFloat("❌ 올바르지 않은 스킨입니다!");
+    return;
+  }
+  if (!Array.isArray(S.ownedSkins)) S.ownedSkins = ["default"];
+  if (it.price === 0 || S.ownedSkins.includes(it.id)) {
+    window.equipSkin(it.id);
+    return;
+  }
+  if (!isPositiveInt(it.price) || S.gold < it.price) {
+    showFloat("🍋 라임이 부족합니다!");
+    return;
+  }
+  S.gold -= it.price;
+  S.ownedSkins.push(it.id);
   updateHUD();
-  equipSkin(id);
+  window.equipSkin(it.id);
 };
-window.equipTheme=function(id){
-  S.currentTheme=id;
+
+window.equipTheme = function(id) {
+  S.currentTheme = id;
   save();
   applyCosmetics();
   openPanel("shop");
 };
-window.buyTheme=function(id,price){
-  if(S.gold<price){showFloat("🍋 라임이 부족합니다!");return;}
-  S.gold-=price;
-  S.ownedThemes.push(id);
-  S.currentTheme=id;
+
+window.buyTheme = function(id) {
+  sanitizeGameNumbers();
+  const th = UI_THEMES.find(x => x.id === id);
+  if (!th) {
+    showFloat("❌ 올바르지 않은 테마입니다!");
+    return;
+  }
+  if (!Array.isArray(S.ownedThemes)) S.ownedThemes = ["lime"];
+  if (th.price === 0 || S.ownedThemes.includes(th.id)) {
+    window.equipTheme(th.id);
+    return;
+  }
+  if (!isPositiveInt(th.price) || S.gold < th.price) {
+    showFloat("🍋 라임이 부족합니다!");
+    return;
+  }
+  S.gold -= th.price;
+  S.ownedThemes.push(th.id);
+  S.currentTheme = th.id;
   save();
   applyCosmetics();
   openPanel("shop");
