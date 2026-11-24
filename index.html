@@ -1503,14 +1503,15 @@ function renderCoreGoalRoom(){
 
 let toastTimer=null;
 function showFloat(msg){
+  const safeMsg=String(msg??"");
   const el=document.getElementById("achieve-float");
   if(el){
-    el.textContent=msg;
-    setTimeout(()=>{if(el.textContent===msg)el.textContent="";},3200);
+    el.textContent=safeMsg;
+    setTimeout(()=>{if(el.textContent===safeMsg)el.textContent="";},3200);
   }
   const container=document.getElementById("global-toast-container");
   if(container){
-    container.innerHTML=`<div class="global-toast">${esc(msg)}</div>`;
+    container.innerHTML=`<div class="global-toast">${esc(safeMsg)}</div>`;
     if(toastTimer)clearTimeout(toastTimer);
     toastTimer=setTimeout(()=>{container.innerHTML="";},3000);
   }
