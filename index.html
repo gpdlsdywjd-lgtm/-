@@ -2288,25 +2288,27 @@ function renderPlanner(){
       wrapper.className="flex flex-col mb-1";
       const items=S.todos.filter(t=>t.date===selectedPlannerDate && (t.cat===cat.id || (!t.cat && cat.id===S.categories[0].id)));
 
-      let itemsHtml="";
+let itemsHtml="";
       if(items.length===0){
         itemsHtml=`<div class="quick-todo-empty">등록된 할 일이 없습니다.</div>`;
       }else{
         items.forEach(item=>{
+          const safeTodoId=esc(item.id);
           itemsHtml+=`
             <div class="quick-todo-row ${item.done?'done':''}">
-              <input type="checkbox" ${item.done?'checked':''} class="accent-[#85b032] w-4 h-4 cursor-pointer shrink-0" onchange="toggleTodo('${item.id}', this.checked)" />
+              <input type="checkbox" ${item.done?'checked':''} class="accent-[#85b032] w-4 h-4 cursor-pointer shrink-0" onchange="toggleTodo('${safeTodoId}', this.checked)" />
               <span class="todo-text">${esc(item.text)}</span>
-              <button type="button" class="todo-delete" onclick="deleteTodo('${item.id}')">삭제</button>
+              <button type="button" class="todo-delete" onclick="deleteTodo('${safeTodoId}')">삭제</button>
             </div>
           `;
         });
       }
 
+      const safeCatId=esc(cat.id);
       let inlineBoxHtml = activeInputCatId===cat.id?`
         <div class="inline-add-box">
-          <input type="text" id="inline-input-${cat.id}" class="inline-add-input" placeholder="새로운 할 일을 입력하세요..." onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)submitInlineAdd('${cat.id}')" />
-          <button type="button" class="inline-add-submit" onclick="submitInlineAdd('${cat.id}')">추가</button>
+          <input type="text" id="inline-input-${safeCatId}" class="inline-add-input" placeholder="새로운 할 일을 입력하세요..." onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)submitInlineAdd('${safeCatId}')" />
+          <button type="button" class="inline-add-submit" onclick="submitInlineAdd('${safeCatId}')">추가</button>
           <button type="button" class="inline-add-cancel" onclick="activeInputCatId=null;renderPlanner();">취소</button>
         </div>
       `:"";
@@ -2314,13 +2316,13 @@ function renderPlanner(){
       wrapper.innerHTML=`
         <div class="category-pill-box">
           <div class="category-pill-left">
-            <span class="category-pill-icon">${cat.icon||'📌'}</span>
+            <span class="category-pill-icon">${esc(cat.icon||'📌')}</span>
             <span class="category-pill-title">${esc(cat.label)}</span>
           </div>
           <div class="category-pill-actions">
-            <button type="button" onclick="toggleInlineAddBox('${cat.id}', event)" class="cat-add-btn" title="할 일 추가">+</button>
-            <button type="button" onclick="editCategory('${cat.id}', event)" class="text-[10px] text-[#7a6e65] hover:text-[#4a6b1e] px-1 font-bold">수정</button>
-            ${S.categories.length>1?`<button type="button" onclick="deleteCategory('${cat.id}', event)" class="text-[10px] text-[#8a8177] hover:text-[#b64058] px-1 font-bold">✕</button>`:''}
+            <button type="button" onclick="toggleInlineAddBox('${safeCatId}', event)" class="cat-add-btn" title="할 일 추가">+</button>
+            <button type="button" onclick="editCategory('${safeCatId}', event)" class="text-[10px] text-[#7a6e65] hover:text-[#4a6b1e] px-1 font-bold">수정</button>
+            ${S.categories.length>1?`<button type="button" onclick="deleteCategory('${safeCatId}', event)" class="text-[10px] text-[#8a8177] hover:text-[#b64058] px-1 font-bold">✕</button>`:''}
           </div>
         </div>
         ${inlineBoxHtml}
