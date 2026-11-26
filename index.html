@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'self'" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <title>라임 코딩 - 방구석 인생 타이쿤</title>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -364,8 +365,8 @@
     </div>
 
     <div class="flex justify-between items-center bg-[#faf8f5] border border-[#d8cebe] px-3 py-1.5 rounded-lg mb-2 text-xs font-bold text-[#5e554c]">
-      <span>💰 총자산 (현금+주식+부동산-대출): <strong id="stat-networth" class="text-[#385d13] font-black">50원</strong></span>
-      <span>📉 총대출: <strong id="stat-totaldebt" class="text-[#b64058] font-black">0원</strong></span>
+      <span>💰 총자산 (현금+주식+부동산-대출): <strong id="stat-networth" class="text-[#385d13] font-black">50🍋</strong></span>
+      <span>📉 총대출: <strong id="stat-totaldebt" class="text-[#b64058] font-black">0🍋</strong></span>
     </div>
 
     <div class="grid grid-cols-3 gap-2 pt-2 border-t border-[#eee6d8] compact-stats">
@@ -519,46 +520,56 @@
   </div>
 </div>
 
-<div id="fullscreen-bug-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-2 sm:p-4" style="display:none;">
-  <div class="bg-[#fffdf9] border-4 border-[#b2d264] shadow-2xl rounded-2xl w-full max-w-lg h-[92vh] flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between bg-[#eef4e2] px-4 py-3 border-b-2 border-[#c4db9b] shrink-0">
-      <div class="flex items-center gap-2">
-        <span class="text-xl">💻</span>
-        <h2 class="text-sm sm:text-base font-bold text-[#4a6b1e]">방구석 에러 코드 타자 디버깅 (5분 마라톤)</h2>
+<div id="fullscreen-bug-modal" class="fixed inset-x-0 top-0 z-[100] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-0 sm:p-4" style="display:none;height:100dvh;">
+  <div class="bg-[#fffdf9] sm:border-4 border-[#b2d264] shadow-2xl sm:rounded-2xl w-full max-w-lg h-full sm:h-[92%] flex flex-col overflow-hidden">
+    <div class="flex items-center justify-between gap-2 bg-[#eef4e2] px-3 sm:px-4 py-2 sm:py-3 border-b-2 border-[#c4db9b] shrink-0" style="padding-top:max(8px,env(safe-area-inset-top))">
+      <div class="flex items-center gap-1.5 min-w-0">
+        <span class="text-lg sm:text-xl">💻</span>
+        <h2 class="text-xs sm:text-base font-bold text-[#4a6b1e] truncate">에러 코드 타자 디버깅 <span class="hidden sm:inline">(5분 마라톤)</span></h2>
       </div>
-      <button type="button" id="bug-close-btn" class="bg-[#d45c6e] text-white px-3 py-1 rounded-lg text-xs font-bold">나가기</button>
+      <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <button type="button" id="bug-stop-btn" class="bg-[#f59e0b] text-white px-3 py-1.5 rounded-lg text-xs font-bold" style="display:none">그만하기</button>
+        <button type="button" id="bug-close-btn" class="bg-[#d45c6e] text-white px-3 py-1.5 rounded-lg text-xs font-bold">나가기</button>
+      </div>
     </div>
-    <div class="flex-1 relative overflow-hidden bg-[#181824] flex flex-col items-center justify-between p-4">
-      <div class="w-full flex justify-between items-center text-xs font-bold text-[#f3c68f]">
-        <span id="bug-timer">남은 시간: 05:00</span>
-        <span id="bug-score">해결한 에러: 0개 | 놓친 에러: 0개</span>
+    <div class="flex-1 min-h-0 relative overflow-hidden bg-[#181824] flex flex-col items-center justify-between p-2 sm:p-4">
+      <div class="w-full flex justify-between items-center gap-2 text-[11px] sm:text-xs font-bold text-[#f3c68f] shrink-0">
+        <span id="bug-timer" class="tabular-nums">⏱ 05:00</span>
+        <span id="bug-score" class="tabular-nums">✅ 0 · ❌ 0</span>
       </div>
 
-      <div id="bug-game-area" class="w-full flex-1 relative bg-[#222233] border-2 border-red-500/40 rounded-xl overflow-hidden my-2 shadow-inner">
-        <div class="absolute inset-0 flex items-center justify-center text-xs text-[#aaa] font-bold text-center p-4 pointer-events-none" id="bug-start-guide">
-          위에서 아래로 내려오는 한글 에러 코드를 보고<br>아래 입력창에 정확히 한글로 타이핑하고 엔터를 치세요!<br>(기본 5분 | 성공 +5초 | 오타·경계선 침범 -5초)
+      <div id="bug-game-area" class="w-full flex-1 min-h-[120px] relative bg-[#222233] border-2 border-red-500/40 rounded-xl overflow-hidden my-1.5 sm:my-2 shadow-inner">
+        <div class="absolute inset-0 flex items-center justify-center text-xs text-[#aaa] font-bold text-center p-4 pointer-events-none leading-relaxed" id="bug-start-guide">
+          위에서 내려오는 한글 에러 코드를<br>아래 입력창에 똑같이 치고 엔터(또는 입력 버튼)!<br>(기본 5분 | 성공 +5초 | 오타·경계선 침범 -5초)<br>경계선을 넘은 에러는 더 이상 잡을 수 없어요.
         </div>
-        <div class="absolute bottom-12 left-0 right-0 border-b-2 border-dashed border-cyan-400 pointer-events-none z-10 flex justify-end pr-2">
+        <div id="bug-feedback" class="absolute top-1.5 left-1/2 -translate-x-1/2 z-20 text-[11px] font-black px-2.5 py-1 rounded-full bg-black/75 text-white pointer-events-none whitespace-nowrap" style="display:none"></div>
+        <div id="bug-line" class="absolute bottom-10 left-0 right-0 border-b-2 border-dashed border-cyan-400 pointer-events-none z-10 flex justify-end pr-2">
           <span class="text-[9px] text-cyan-300 bg-black/60 px-1 rounded">경계선</span>
         </div>
       </div>
 
-      <div class="w-full flex flex-col gap-2">
-        <input type="text" id="bug-input" autocomplete="off" placeholder="한글 에러 코드를 타이핑하고 엔터... (틀리면 -5초)" class="w-full bg-[#111] border-2 border-[#b2d264] rounded-xl px-3 py-2.5 text-sm font-mono font-bold text-[#f87171] outline-none shadow" disabled />
+      <form id="bug-form" class="w-full flex flex-col gap-1.5 sm:gap-2 shrink-0" autocomplete="off" onsubmit="return false;">
+        <div class="flex gap-1.5">
+          <input type="text" id="bug-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" placeholder="에러 코드 입력 후 엔터 (틀리면 -5초)" class="min-w-0 flex-1 bg-[#111] border-2 border-[#b2d264] rounded-xl px-3 py-2.5 font-mono font-bold text-[#f87171] outline-none shadow" style="font-size:16px" disabled />
+          <button type="submit" id="bug-submit-btn" class="shrink-0 bg-[#85b032] text-white font-black px-4 rounded-xl text-sm disabled:opacity-40" disabled>입력</button>
+        </div>
         <button type="button" id="bug-start-btn" class="w-full bg-[#85b032] hover:bg-[#739b28] text-white font-bold py-2.5 text-xs rounded-xl shadow transition-all">디버깅 시작하기</button>
-      </div>
+      </form>
     </div>
   </div>
 </div>
 
 <div id="fullscreen-suika-modal" class="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-2 sm:p-4" style="display:none;">
   <div class="bg-[#fffdf9] border-4 border-[#b2d264] shadow-2xl rounded-2xl w-full max-w-md h-[88vh] flex flex-col overflow-hidden">
-    <div class="flex items-center justify-between bg-[#eef4e2] px-4 py-3 border-b-2 border-[#c4db9b] shrink-0">
-      <div class="flex items-center gap-2">
+    <div class="flex items-center justify-between gap-2 bg-[#eef4e2] px-3 sm:px-4 py-3 border-b-2 border-[#c4db9b] shrink-0">
+      <div class="flex items-center gap-1.5 min-w-0">
         <span class="text-xl">🍉</span>
-        <h2 class="text-sm sm:text-base font-bold text-[#4a6b1e]">과일 합치기 (수박 게임 · 15단계)</h2>
+        <h2 class="text-sm sm:text-base font-bold text-[#4a6b1e] truncate">과일 합치기<span class="hidden sm:inline"> (수박 게임 · 15단계)</span></h2>
       </div>
-      <button type="button" id="suika-close-btn" class="bg-[#d45c6e] text-white px-3 py-1 rounded-lg text-xs font-bold">나가기</button>
+      <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
+        <button type="button" id="suika-stop-btn" class="bg-[#f59e0b] text-white px-3 py-1 rounded-lg text-xs font-bold">그만하기</button>
+        <button type="button" id="suika-close-btn" class="bg-[#d45c6e] text-white px-3 py-1 rounded-lg text-xs font-bold">나가기</button>
+      </div>
     </div>
     <div class="flex-1 relative overflow-hidden bg-[#fffae5] flex flex-col items-center justify-center p-4">
       <div class="text-xs font-bold text-[#b8860b] mb-1" id="suika-score-hud">점수: 0</div>
@@ -743,8 +754,15 @@ let oneTapShown = false;
 let authChecked = false;
 
 // 클라우드 읽기/쓰기는 Firebase 인증이 된 상태에서만 (Firestore 규칙이 본인 문서만 허용)
+// [보안] Firebase 세션의 구글 계정(sub)과 화면에 로그인된 계정이 같을 때만 클라우드 사용
+// (다른 계정 세션이 남아 있으면 A 계정으로 인증된 채 B 계정 데이터를 읽고 쓰려는 상황을 막는다)
+function googleUidOf(u){
+  const gp=u&&Array.isArray(u.providerData)?u.providerData.find(p=>p&&p.providerId==="google.com"):null;
+  return gp?String(gp.uid):"";
+}
 function cloudAllowed(){
-  return !!(db && fbAuth && fbAuth.currentUser && currentGoogleUser && currentGoogleUser.id);
+  if(!(db && fbAuth && fbAuth.currentUser && currentGoogleUser && currentGoogleUser.id)) return false;
+  return googleUidOf(fbAuth.currentUser)===String(currentGoogleUser.id);
 }
 // idToken: One Tap(자격 증명 JWT) / accessToken: 버튼 로그인(OAuth 토큰) — 둘 중 하나만 넘기면 된다
 async function firebaseSignIn(idToken, accessToken){
@@ -760,6 +778,12 @@ return false;
 }
 }
 
+function sanitizeUserInfo(u){
+  if(!u||typeof u!=="object") return null;
+  const id=String(u.id||"");
+  if(!/^[A-Za-z0-9_.@+-]{1,128}$/.test(id)) return null;
+  return {id, name:String(u.name||"구글 사용자").slice(0,40), email:String(u.email||"").slice(0,120)};
+}
 function parseJwt(token){
   const part = String(token).split(".")[1] || "";
   const b64 = part.replace(/-/g, "+").replace(/_/g, "/");
@@ -936,6 +960,8 @@ function scheduleFirestoreSave(immediate){
 // ===== 로그인 공통 처리 (버튼 로그인 / One Tap 모두 이 함수를 통과) =====
 async function applyLogin(userInfo, authFn){
   if(loggingIn) return;
+  userInfo=sanitizeUserInfo(userInfo);
+  if(!userInfo){ showFloat("구글 계정 정보를 확인하지 못했어요."); return; }
   loggingIn = true;
   try{
     const wasGuest = !currentGoogleUser;
@@ -1037,6 +1063,7 @@ function bindTokenClient(){
           const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
             headers: { Authorization: "Bearer " + tokenResponse.access_token }
           });
+          if(!res.ok) throw new Error("userinfo "+res.status);
           const profile = await res.json();
           const userInfo = {
             id: profile.sub || profile.email || "google_user",
@@ -1065,7 +1092,7 @@ function initGoogleAuth(){
   try{
     const savedUser = localStorage.getItem(ACTIVE_USER_KEY);
     if(savedUser){
-      currentGoogleUser = JSON.parse(savedUser);
+      currentGoogleUser = sanitizeUserInfo(JSON.parse(savedUser));
     }
   }catch(e){}
   if(currentGoogleUser && currentGoogleUser.id){
@@ -1076,6 +1103,11 @@ function initGoogleAuth(){
     authRestored.then(u=>{
       // 이전 버전에서 로그인했거나 세션이 만료되면 구글 로그인을 한 번 더 눌러야 동기화됨 (로컬 저장은 계속 동작)
       if(!u) needRelogin = true;
+      else if(googleUidOf(u)!==String(currentGoogleUser.id)){
+        // 저장된 로그인 정보와 Firebase 세션 계정이 다름 → 세션을 끊고 다시 로그인 요청
+        needRelogin = true;
+        try{ fbAuth.signOut(); }catch(e){}
+      }
       authChecked = true;
       updateGoogleLoginUI();
       syncFromFirestoreOnce();
@@ -1172,9 +1204,9 @@ const DEFAULT_CATEGORIES=[
 
 const REAL_ESTATE_ITEMS=[
   {id:"semi_basement",name:"반지하 기본 원룸",price:0,rent:0,value:0,bg:"#6b6159",decor:"🛏️ 🪑 📦",badge:"반지하 원룸 · 쉬었음 청년"},
-  {id:"cozy_room",name:"햇살 좋은 우드 자취방",price:80,rent:1,value:80,bg:"linear-gradient(135deg,#8d6e63,#a1887f)",decor:"🪴 📚 ☕",badge:"우드 자취방 · 자립 준비생"},
-  {id:"officetel",name:"신축 풀옵션 오피스텔",price:200,rent:3,value:200,bg:"linear-gradient(135deg,#283e51,#4b79a1)",decor:"💻 ☕ 🏙️",badge:"오피스텔 · 프리랜서 개발자"},
-  {id:"penthouse",name:"한강뷰 펜트하우스",price:500,rent:8,value:500,bg:"linear-gradient(135deg,#0f4c81,#38bdf8)",decor:"🏙️ 🥂 🛋️",badge:"펜트하우스 · 성공한 갓생러"}
+  {id:"cozy_room",name:"햇살 좋은 우드 자취방",price:80,rent:6,value:80,bg:"linear-gradient(135deg,#8d6e63,#a1887f)",decor:"🪴 📚 ☕",badge:"우드 자취방 · 자립 준비생"},
+  {id:"officetel",name:"신축 풀옵션 오피스텔",price:200,rent:15,value:200,bg:"linear-gradient(135deg,#283e51,#4b79a1)",decor:"💻 ☕ 🏙️",badge:"오피스텔 · 프리랜서 개발자"},
+  {id:"penthouse",name:"한강뷰 펜트하우스",price:500,rent:36,value:500,bg:"linear-gradient(135deg,#0f4c81,#38bdf8)",decor:"🏙️ 🥂 🛋️",badge:"펜트하우스 · 성공한 갓생러"}
 ];
 
 const ROOM_SKIN_ITEMS=[
@@ -1192,31 +1224,60 @@ const UI_THEMES=[
   {id:"lavender",name:"몽환적 라벤더",price:110,bg:"#f5f3ff",stageBg:"#ede9fe",stageBorder:"#c4b5fd",accent:"#7c3aed"}
 ];
 
+// w = 확률(%) — 라임 기대값 약 5.8🍋 + 체력·멘탈·EXP 아이템 (라임 벌이용이 아니라 상태 회복용 뽑기)
 const PARCEL_REWARDS=[
-  {name:"꽝... 찢어진 뽁뽁이",type:"gold",val:5,rarity:"일반",emoji:"🫧"},
-  {name:"편의점 삼각김밥 쿠폰",type:"stamina",val:20,rarity:"일반",emoji:"🍙"},
-  {name:"달달한 바나나우유",type:"mental",val:20,rarity:"일반",emoji:"🍌"},
-  {name:"중고 기계식 키보드",type:"exp",val:45,rarity:"희귀",emoji:"⌨️"},
-  {name:"당근마켓 소액 환급금",type:"gold",val:55,rarity:"희귀",emoji:"💵"},
-  {name:"한정판 황금 라임 피규어",type:"gold",val:150,rarity:"전설",emoji:"👑"}
+  {name:"꽝... 찢어진 뽁뽁이",type:"gold",val:5,rarity:"일반",emoji:"🫧",w:30},
+  {name:"편의점 삼각김밥 쿠폰",type:"stamina",val:25,rarity:"일반",emoji:"🍙",w:25},
+  {name:"달달한 바나나우유",type:"mental",val:25,rarity:"일반",emoji:"🍌",w:25},
+  {name:"중고 기계식 키보드",type:"exp",val:60,rarity:"희귀",emoji:"⌨️",w:12},
+  {name:"당근마켓 소액 환급금",type:"gold",val:40,rarity:"희귀",emoji:"💵",w:7},
+  {name:"한정판 황금 라임 피규어",type:"gold",val:150,rarity:"전설",emoji:"👑",w:1}
 ];
+function pickWeighted(list){const total=list.reduce((a,x)=>a+x.w,0);let r=Math.random()*total;for(const x of list){r-=x.w;if(r<0)return x;}return list[list.length-1];}
+
+const LOAN_PRODUCTS = {
+  small: { id: "small", name: "청년 소액대출", principal: 50, interestRate: 3, minCredit: 600 },
+  minus: { id: "minus", name: "방구석 마이너스 통장", principal: 150, interestRate: 10, minCredit: 750 }
+};
+
+// ===== [밸런스] 경제 상수 — 숫자는 여기서만 바꾸면 된다 =====
+const BAL={
+  todoGold:10, todoExp:15, todoDailyCap:20,          // 할 일 1개 보상, 하루 보상 개수 한도
+  studyEverySec:300, studyGold:8, studyExp:20, studyDailyCap:36, // 집중 타이머: 5분마다, 하루 최대 36회(3시간)
+  miniDailyCap:150,                                   // 미니게임 라임 하루 한도
+  bugGoldPerSolve:2, suikaScorePerGold:20,            // 디버깅 1개당, 수박게임 점수 몇 점당 1라임
+  tradeFeeRate:0.01,                                  // 주식 거래 수수료 1% (최소 1라임)
+  lottoCost:15, parcelCost:30
+};
+// 복권: 기대값 약 11.2🍋 / 15🍋 (환급률 약 74%)
+const LOTTO_TABLE=[
+  {p:0.5, prize:500, msg:"🎊 대박! 1등 당첨! (+500🍋)"},
+  {p:4,   prize:60,  msg:"🎉 2등 당첨! (+60🍋)"},
+  {p:15,  prize:25,  msg:"✨ 3등 당첨! (+25🍋)"},
+  {p:25,  prize:10,  msg:"🍀 4등 당첨! (+10🍋)"}
+]; // 나머지 55.5% 꽝
 
 const STOCK_DEFS=[
-  {id:"LIME",name:"라임바이오",base:20,dividend:2},
-  {id:"BYTE",name:"방구석소프트",base:35,dividend:3},
-  {id:"SHARK",name:"아기상어푸드",base:25,dividend:2},
-  {id:"NOOD",name:"천하제일짜장",base:15,dividend:1}
+  // dividend = 1주당 시간당 배당 (접속 중 매분 나눠서 지급)
+  {id:"LIME",name:"라임바이오",base:20,dividend:1},
+  {id:"BYTE",name:"방구석소프트",base:35,dividend:2},
+  {id:"SHARK",name:"아기상어푸드",base:25,dividend:1},
+  {id:"NOOD",name:"천하제일짜장",base:15,dividend:0.5}
 ];
 
+const STOCK_NEWS_CHANCE=0.02, STOCK_NEWS_SCALE=0.25, STOCK_NOISE=0.006, STOCK_REVERT=0.0005; // 6초마다 1틱
+const STOCK_MIN_MUL=0.3, STOCK_MAX_MUL=4; // 주가는 기준가의 0.3배 ~ 4배 안에서 움직임
 const STOCK_NEWS_POOL=[
-  {target:"SHARK",text:"[특종] 부캉이 크리에이터, 아기상어 주식 전격 대량 매수 소식에 상한가 직행!",delta:0.42},
+  {target:"SHARK",text:"[특종] 부캉이 크리에이터, 아기상어 주식 전격 대량 매수 소식에 급등!",delta:0.30},
   {target:"LIME",text:"[속보] 라임바이오, 피로회복 신물질 임상 성공 발표!",delta:0.30},
   {target:"BYTE",text:"[경제] 방구석소프트 신작 인디게임 글로벌 다운로드 1위 달성!",delta:0.28},
   {target:"NOOD",text:"[맛집] 천하제일짜장, 짜장면 가격 동결 선언에 매수세 유입",delta:0.22},
-  {target:"SHARK",text:"[루머] 부캉이, 아기상어 주식 전량 매도설에 주가 일시 급락",delta:-0.28},
-  {target:"LIME",text:"[단독] 라임바이오 핵심 연구원 대규모 이직설 확산",delta:-0.20},
-  {target:"BYTE",text:"[긴급] 방구석소프트 서버 다운 사태로 유저 불만 폭주",delta:-0.25},
-  {target:"ALL",text:"[증시] 밤샘 코딩 열풍으로 청년 개미 투자자 대거 유입",delta:0.12}
+  {target:"SHARK",text:"[루머] 부캉이, 아기상어 주식 전량 매도설에 주가 일시 급락",delta:-0.30},
+  {target:"LIME",text:"[단독] 라임바이오 핵심 연구원 대규모 이직설 확산",delta:-0.30},
+  {target:"BYTE",text:"[긴급] 방구석소프트 서버 다운 사태로 유저 불만 폭주",delta:-0.28},
+  {target:"NOOD",text:"[위생] 천하제일짜장, 위생 점검에서 지적 사항 나와 매도세",delta:-0.22},
+  {target:"ALL",text:"[증시] 밤샘 코딩 열풍으로 청년 개미 투자자 대거 유입",delta:0.12},
+  {target:"ALL",text:"[증시] 금리 인상 우려에 투자 심리 위축",delta:-0.12}
 ];
 
 function todayKey(d){const x=d?new Date(d):new Date();return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");}
@@ -1226,7 +1287,7 @@ function formatTime(sec){sec=Math.floor(sec);const m=Math.floor(sec/60),s=sec%60
 
 function defaultState(){return{
   level:1, exp:0, gold:50, mental:52, stamina:25, action:"reels",
-  todos:[], categories:DEFAULT_CATEGORIES, events:{}, attendanceLog:[], lastAttendance:"", attendanceStreak:0,
+  todos:[], categories:DEFAULT_CATEGORIES.map(c=>({...c})), events:{}, todoReward:{date:"",count:0}, studyReward:{date:"",count:0}, miniReward:{date:"",amount:0}, passiveCarry:0, attendanceLog:[], lastAttendance:"", attendanceStreak:0,
   achievements:[], bestBugScore:0, bestSuika:0, studySeconds:0, studyRunning:false,
   bigEvent:"", bigEventSuccess:false,
   coreGoal:"", coreGoalSuccess:false,
@@ -1245,37 +1306,122 @@ function defaultState(){return{
     prevPrices:{LIME:20,BYTE:35,SHARK:25,NOOD:15},
     holdings:{LIME:0,BYTE:0,SHARK:0,NOOD:0},
     avgCost:{LIME:0,BYTE:0,SHARK:0,NOOD:0},
+    raw:{LIME:20,BYTE:35,SHARK:25,NOOD:15},
     candles:{LIME:[{o:20,c:20,h:20,l:20}],BYTE:[{o:35,c:35,h:35,l:35}],SHARK:[{o:25,c:25,h:25,l:25}],NOOD:[{o:15,c:15,h:15,l:15}]},
     news:"[개장] 오늘의 주식시장이 열렸습니다. 뉴스를 주목하세요!",
     newsHistory:["[개장] 오늘의 주식시장이 열렸습니다. 뉴스를 주목하세요!"]
   }
 };}
 
+// ===== [보안] 저장 데이터 검증 =====
+// localStorage·Firestore에서 온 상태는 언제든 조작될 수 있으므로, 알려진 필드만 골라 타입·범위·길이를 강제한다.
+// (따옴표가 들어간 ID → onclick 속성 탈출 XSS, 문자열 라임 → NaN/문자열 덧셈, 소유하지 않은 집·테마 장착, 무한히 커지는 배열 등을 차단)
+const SAFE_ID=/^[A-Za-z0-9_-]{1,64}$/;
+const DATE_RE=/^\d{4}-\d{2}-\d{2}$/;
+const ACTION_IDS=["reels","coding","game","sleep","eat","walk"];
+const MAX_TODOS=3000, MAX_CATEGORIES=30, TODO_TEXT_MAX=100, CAT_LABEL_MAX=30, GOAL_TEXT_MAX=50;
+function vNum(v,def,min,max,int){v=Number(v);if(!Number.isFinite(v))v=def;v=Math.max(min,Math.min(max,v));return int?Math.trunc(v):v;}
+function vStr(v,max,def){return typeof v==="string"?v.slice(0,max):(def||"");}
+function vBool(v){return v===true;}
+function vArr(v){return Array.isArray(v)?v:[];}
+function vObj(v){return v&&typeof v==="object"&&!Array.isArray(v)?v:{};}
+function newSafeId(prefix){return prefix+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,8);}
+function own(o,k){return Object.prototype.hasOwnProperty.call(o,k);}
+
 function normalizeState(parsed){
-  const def=defaultState();
-  const merged=Object.assign(def,parsed||{});
-  merged.todos=Array.isArray(merged.todos)?merged.todos:[];
-  merged.categories=Array.isArray(merged.categories)&&merged.categories.length?merged.categories:DEFAULT_CATEGORIES;
-  merged.stocks=Object.assign(def.stocks,(parsed&&parsed.stocks)||{});
-  merged.stocks.prices=Object.assign(def.stocks.prices,(parsed&&parsed.stocks&&parsed.stocks.prices)||{});
-  merged.stocks.prevPrices=Object.assign(def.stocks.prevPrices,(parsed&&parsed.stocks&&parsed.stocks.prevPrices)||{});
-  merged.stocks.holdings=Object.assign(def.stocks.holdings,(parsed&&parsed.stocks&&parsed.stocks.holdings)||{});
-  merged.stocks.avgCost=Object.assign(def.stocks.avgCost,(parsed&&parsed.stocks&&parsed.stocks.avgCost)||{});
-  merged.stocks.candles=Object.assign(def.stocks.candles,(parsed&&parsed.stocks&&parsed.stocks.candles)||{LIME:[{o:20,c:20,h:20,l:20}]});
-  if(!Array.isArray(merged.stocks.newsHistory))merged.stocks.newsHistory=[merged.stocks.news];
-  if(!Array.isArray(merged.ownedRealEstate))merged.ownedRealEstate=["semi_basement"];
-  if(!merged.currentEstate)merged.currentEstate="semi_basement";
-  if(!Array.isArray(merged.ownedThemes))merged.ownedThemes=["lime"];
-  if(!merged.currentTheme)merged.currentTheme="lime";
-  if(!Array.isArray(merged.achievements))merged.achievements=[];
-  if(!Array.isArray(merged.parcelHistory))merged.parcelHistory=[];
-  if(typeof merged.creditScore!=="number")merged.creditScore=850;
-  if(!Array.isArray(merged.loans))merged.loans=[];
-  if(!Array.isArray(merged.ownedSkins))merged.ownedSkins=["default"];
-  if(!merged.estateSkins||typeof merged.estateSkins!=="object")merged.estateSkins={};
-  if(typeof merged._lastSyncedAt!=="number")merged._lastSyncedAt=0;
-  if(typeof merged.tutorialDone!=="boolean")merged.tutorialDone=false;
-  return merged;
+  const P=vObj(parsed), d=defaultState();
+  const st=d; // 기본값 위에 검증된 값만 덮어쓴다 (모르는 키·__proto__ 등은 버림)
+  st.level=vNum(P.level,1,1,9999,true);
+  st.exp=vNum(P.exp,0,0,1e9);
+  st.gold=vNum(P.gold,50,-1e9,1e12,true);
+  st.mental=vNum(P.mental,52,0,100);
+  st.stamina=vNum(P.stamina,25,0,100);
+  st.creditScore=vNum(P.creditScore,850,300,1000,true);
+  st.action=ACTION_IDS.includes(P.action)?P.action:"reels";
+
+  // 카테고리
+  const catSeen=new Set();
+  st.categories=vArr(P.categories).slice(0,MAX_CATEGORIES).map(c=>{
+    c=vObj(c);
+    let id=SAFE_ID.test(c.id)&&!catSeen.has(c.id)?c.id:newSafeId("cat");
+    catSeen.add(id);
+    return {id,label:vStr(c.label,CAT_LABEL_MAX).trim()||"카테고리",icon:vStr(c.icon,8)||"📌"};
+  });
+  if(!st.categories.length) st.categories=DEFAULT_CATEGORIES.map(c=>({...c}));
+
+  // 할 일
+  const todoSeen=new Set();
+  st.todos=vArr(P.todos).slice(-MAX_TODOS).map(t=>{
+    t=vObj(t);
+    const text=vStr(t.text,TODO_TEXT_MAX).trim();
+    if(!text||!DATE_RE.test(t.date)) return null;
+    let id=SAFE_ID.test(t.id)&&!todoSeen.has(t.id)?t.id:newSafeId("todo");
+    todoSeen.add(id);
+    return {id,text,cat:SAFE_ID.test(t.cat)?t.cat:"",date:t.date,done:vBool(t.done),rewarded:vBool(t.rewarded)};
+  }).filter(Boolean);
+  const tr=vObj(P.todoReward);
+  st.todoReward={date:DATE_RE.test(tr.date)?tr.date:"",count:vNum(tr.count,0,0,1e6,true)};
+
+  const sr=vObj(P.studyReward), mr=vObj(P.miniReward);
+  st.studyReward={date:DATE_RE.test(sr.date)?sr.date:"",count:vNum(sr.count,0,0,1e6,true)};
+  st.miniReward={date:DATE_RE.test(mr.date)?mr.date:"",amount:vNum(mr.amount,0,0,1e9,true)};
+  st.passiveCarry=vNum(P.passiveCarry,0,-1,1);
+  st.events=vObj(P.events);
+  st.attendanceLog=vArr(P.attendanceLog).filter(x=>DATE_RE.test(x)).slice(-400);
+  st.lastAttendance=DATE_RE.test(P.lastAttendance)?P.lastAttendance:"";
+  st.attendanceStreak=vNum(P.attendanceStreak,0,0,100000,true);
+  st.achievements=[...new Set(vArr(P.achievements).filter(k=>typeof k==="string"&&own(ACHIEVE_DEFS,k)))];
+  st.bestBugScore=vNum(P.bestBugScore,0,0,1e6,true);
+  st.bestSuika=vNum(P.bestSuika,0,0,1e9,true);
+  st.studySeconds=vNum(P.studySeconds,0,0,1e9,true);
+  st.studyRunning=vBool(P.studyRunning);
+  st.bigEvent=vStr(P.bigEvent,GOAL_TEXT_MAX); st.bigEventSuccess=vBool(P.bigEventSuccess);
+  st.coreGoal=vStr(P.coreGoal,GOAL_TEXT_MAX); st.coreGoalSuccess=vBool(P.coreGoalSuccess);
+  st.lastTick=Date.now();
+  st._lastSyncedAt=vNum(P._lastSyncedAt,0,0,Date.now()+864e5);
+  st.tutorialDone=vBool(P.tutorialDone);
+  st.lastDividendTime=vNum(P.lastDividendTime,0,0,1e15);
+
+  // 소유물: 실제 상품 목록에 있는 것만, 장착은 소유한 것만
+  const estIds=REAL_ESTATE_ITEMS.map(x=>x.id), skinIds=ROOM_SKIN_ITEMS.map(x=>x.id), themeIds=UI_THEMES.map(x=>x.id);
+  st.ownedRealEstate=[...new Set(["semi_basement",...vArr(P.ownedRealEstate).filter(x=>estIds.includes(x))])];
+  st.currentEstate=st.ownedRealEstate.includes(P.currentEstate)?P.currentEstate:"semi_basement";
+  st.ownedSkins=[...new Set(["default",...vArr(P.ownedSkins).filter(x=>skinIds.includes(x))])];
+  st.estateSkins={};
+  const es=vObj(P.estateSkins);
+  estIds.forEach(eid=>{ if(own(es,eid)&&st.ownedSkins.includes(es[eid])) st.estateSkins[eid]=es[eid]; });
+  st.ownedThemes=[...new Set(["lime",...vArr(P.ownedThemes).filter(x=>themeIds.includes(x))])];
+  st.currentTheme=st.ownedThemes.includes(P.currentTheme)?P.currentTheme:"lime";
+
+  st.parcelHistory=vArr(P.parcelHistory).slice(-50).map(r=>{r=vObj(r);
+    return {name:vStr(r.name,40),type:vStr(r.type,10),val:vNum(r.val,0,0,1e6,true),rarity:vStr(r.rarity,10),emoji:vStr(r.emoji,8)};});
+
+  // 대출: 정해진 상품으로만 다시 만든다 (원금·이자·이름을 저장값에서 믿지 않음)
+  st.loans=vArr(P.loans).slice(0,10).map(l=>{
+    l=vObj(l);
+    const prod=(own(LOAN_PRODUCTS,l.productId)&&LOAN_PRODUCTS[l.productId])||
+      Object.values(LOAN_PRODUCTS).find(x=>x.name===l.name)||
+      Object.values(LOAN_PRODUCTS).find(x=>x.principal===l.principal&&x.interestRate===l.interestRate);
+    return prod?{productId:prod.id,principal:prod.principal,interestRate:prod.interestRate,name:prod.name,takenAt:vNum(l.takenAt,Date.now(),0,Date.now())}:null;
+  }).filter(Boolean);
+
+  // 주식
+  const PS=vObj(P.stocks), pr=vObj(PS.prices), pp=vObj(PS.prevPrices), ho=vObj(PS.holdings), ac=vObj(PS.avgCost), ca=vObj(PS.candles);
+  STOCK_DEFS.forEach(sd=>{
+    const id=sd.id;
+    const lo=Math.max(1,Math.round(sd.base*STOCK_MIN_MUL)), hi=Math.round(sd.base*STOCK_MAX_MUL);
+    st.stocks.prices[id]=vNum(pr[id],sd.base,lo,hi,true);
+    st.stocks.prevPrices[id]=vNum(pp[id],st.stocks.prices[id],lo,hi,true);
+    st.stocks.raw[id]=vNum(vObj(PS.raw)[id],st.stocks.prices[id],sd.base*STOCK_MIN_MUL,sd.base*STOCK_MAX_MUL);
+    st.stocks.holdings[id]=vNum(ho[id],0,0,1e7,true);
+    st.stocks.avgCost[id]=st.stocks.holdings[id]?vNum(ac[id],0,0,1e6,true):0;
+    const cs=vArr(ca[id]).slice(-12).map(c=>{c=vObj(c);return {o:vNum(c.o,sd.base,0,1e6),c:vNum(c.c,sd.base,0,1e6),h:vNum(c.h,sd.base,0,1e6),l:vNum(c.l,sd.base,0,1e6)};});
+    if(cs.length) st.stocks.candles[id]=cs;
+  });
+  st.stocks.news=vStr(PS.news,200)||d.stocks.news;
+  st.stocks.newsHistory=vArr(PS.newsHistory).filter(x=>typeof x==="string").map(x=>x.slice(0,200)).slice(0,15);
+  if(!st.stocks.newsHistory.length) st.stocks.newsHistory=[st.stocks.news];
+  return st;
 }
 
 function load(){
@@ -1298,7 +1444,7 @@ function save(skipCloud){
 
 try{
   const bootUserRaw = localStorage.getItem(ACTIVE_USER_KEY);
-  if(bootUserRaw) currentGoogleUser = JSON.parse(bootUserRaw);
+  if(bootUserRaw) currentGoogleUser = sanitizeUserInfo(JSON.parse(bootUserRaw));
 }catch(e){}
 
 let S = load();
@@ -1321,14 +1467,14 @@ const TUTORIAL_STEPS=[
    <li>⭐ 빅이벤트 / 🎯 핵심 목표는 방 상단에 계속 표시돼요.</li></ul>`},
   {icon:"🛋️",title:"방 안의 캐릭터 움직이기",
    body:`<ul><li>3D 방의 <b>침대·책상·식탁</b>을 눌러 행동을 고르면 캐릭터가 직접 이동해요.</li>
-   <li>화면을 <b>드래그</b>하면 시점이 돌아가고, 창문을 누르면 낮/밤을 바꿀 수 있어요.</li>
+   <li>화면을 <b>드래그</b>하면 시점이 돌아가고, 창문을 누르면 낮/밤과 <b>낮 밝기</b>를 바꿀 수 있어요.</li>
    <li>하단 <b>목록 ▾</b>에서도 행동을 고를 수 있어요.</li>
    <li>행동에 따라 <b>멘탈·체력·EXP</b>가 변해요.</li></ul>`},
   {icon:"🛍️",title:"하단 메뉴 둘러보기",
    body:`<ul><li><b>상점</b>: 부동산·인테리어 스킨·UI 테마·택배·복권, 그리고 <b>자산센터(대출)</b></li>
-   <li><b>주식</b>: 평일 09:00~15:30 거래, 배당금은 매분 자동 지급</li>
+   <li><b>주식</b>: 평일 09:00~15:30 거래 (수수료 1%), 배당·임대료는 접속 중 시간당 비율로 정산</li>
    <li><b>타이머</b>: 집중 시간만큼 EXP·라임 보상</li>
-   <li><b>업적 · 미니게임</b>: 타자 디버깅, 과일 합치기로 추가 보상!</li></ul>`},
+   <li><b>업적 · 미니게임</b>: 타자 디버깅, 과일 합치기로 추가 보상! (하루 한도 있음)</li></ul>`},
   {icon:"☁️",title:"저장과 로그인 안내",
    body:`<ul><li>구글 계정으로 로그인하면 <b>기기 간 자동 동기화</b>돼요.</li>
    <li>상단 <b>로그아웃</b> 버튼으로 언제든 계정에서 나갈 수 있어요.</li>
@@ -1428,40 +1574,43 @@ function getMarketStatus(){
   return {isOpen};
 }
 
+// [밸런스] 주가 공식 — 시뮬레이션 기준: 하루 보유 시 평균 본전, 뉴스·변동으로 오르내림
+// (이전 공식은 오를 확률이 기본으로 높고 6초마다 뉴스가 붙어, 1시간 만에 주가가 수십만 배가 됐음)
 function tickStockMarket(){
   const mkt=getMarketStatus();
   if(!mkt.isOpen) return;
 
-  const news=STOCK_NEWS_POOL[Math.floor(Math.random()*STOCK_NEWS_POOL.length)];
-  S.stocks.news=news.text;
-  if(!Array.isArray(S.stocks.newsHistory))S.stocks.newsHistory=[];
-  S.stocks.newsHistory.unshift(news.text);
-  if(S.stocks.newsHistory.length>15)S.stocks.newsHistory.pop();
-
-  const tickerEl=document.getElementById("live-news-ticker");
-  if(tickerEl)tickerEl.textContent=news.text;
+  const news=Math.random()<STOCK_NEWS_CHANCE?STOCK_NEWS_POOL[Math.floor(Math.random()*STOCK_NEWS_POOL.length)]:null;
+  if(news){
+    S.stocks.news=news.text;
+    if(!Array.isArray(S.stocks.newsHistory))S.stocks.newsHistory=[];
+    S.stocks.newsHistory.unshift(news.text);
+    if(S.stocks.newsHistory.length>15)S.stocks.newsHistory.pop();
+    const tickerEl=document.getElementById("live-news-ticker");
+    if(tickerEl)tickerEl.textContent=news.text;
+  }
+  if(!S.stocks.raw||typeof S.stocks.raw!=="object")S.stocks.raw={};
 
   STOCK_DEFS.forEach(st=>{
-    const cur=S.stocks.prices[st.id]||st.base;
+    const b=st.base, lo=b*STOCK_MIN_MUL, hi=b*STOCK_MAX_MUL;
+    const cur=S.stocks.prices[st.id]||b;
+    let raw=Number(S.stocks.raw[st.id]); if(!Number.isFinite(raw)||raw<=0) raw=cur;
+    // 작은 무작위 변동(평균 0) + 아주 약한 기준가 복원 + 가끔 뉴스
+    let d=(Math.random()-0.5)*2*STOCK_NOISE - STOCK_REVERT*Math.log(raw/b);
+    if(news && (news.target===st.id || news.target==="ALL")) d+=news.delta*STOCK_NEWS_SCALE;
+    raw=Math.min(hi,Math.max(lo,raw*(1+d)));
+    S.stocks.raw[st.id]=raw;
+    const nextPrice=Math.max(1,Math.round(raw));
     S.stocks.prevPrices[st.id]=cur;
-    let drift=(Math.random()-0.48)*0.14;
-    if(news.target===st.id || news.target==="ALL")drift+=news.delta;
-    const nextPrice=Math.max(5,Math.round(cur*(1+drift)));
     S.stocks.prices[st.id]=nextPrice;
 
     if(!Array.isArray(S.stocks.candles[st.id]))S.stocks.candles[st.id]=[{o:cur,c:cur,h:cur,l:cur}];
-    const openPrice=cur;
-    const closePrice=nextPrice;
-    const highPrice=Math.max(openPrice,closePrice)+Math.floor(Math.random()*3);
-    const lowPrice=Math.max(1,Math.min(openPrice,closePrice)-Math.floor(Math.random()*3));
-
-    S.stocks.candles[st.id].push({o:openPrice,c:closePrice,h:highPrice,l:lowPrice});
+    S.stocks.candles[st.id].push({o:cur,c:nextPrice,h:Math.max(cur,nextPrice),l:Math.min(cur,nextPrice)});
     if(S.stocks.candles[st.id].length>12)S.stocks.candles[st.id].shift();
   });
   save(true); // 주가 변동은 기기마다 따로 굴러가므로 클라우드에 매번 올리지 않음 (무료 쓰기 한도 보호)
   if(currentOpenTab==="stock"||currentOpenTab==="media")openPanel(currentOpenTab);
 }
-window.tickStockMarket=tickStockMarket;
 
 function renderCoreGoalRoom(){
   const bigTxtEl=document.getElementById("room-bigevent-text");
@@ -1568,7 +1717,7 @@ function openPanel(tab){
         html+=`<div class="flex items-center justify-between p-2.5 rounded-xl border border-[#d8cebe] bg-[#faf8f5]">
           <div>
             <div class="text-xs font-black text-[#2b2621]">${est.name}</div>
-            <div class="text-[10px] text-[#7a6e65]">자산가치: ${est.value}🍋 · 임대료: +${est.rent}🍋/분</div>
+            <div class="text-[10px] text-[#7a6e65]">자산가치: ${est.value}🍋 · 임대료: +${est.rent}🍋/시간</div>
           </div>`;
         if(equipped){
           html+=`<span class="text-xs font-bold text-[#85b032] px-3 py-1">거주 중</span>`;
@@ -1613,7 +1762,7 @@ function openPanel(tab){
           <span class="text-xs font-black text-[#2b2621]">💳 내 신용점수</span>
           <span class="text-sm font-black text-[#f59e0b]">${S.creditScore}점</span>
         </div>
-        <div class="text-[10px] text-[#7a6e65]">투두 완료 시 +3점 상승 / 출석 시 +5점 / 대출 이자 미납 시 자동 차감</div>
+        <div class="text-[10px] text-[#7a6e65]">투두 완료 시 +3점 / 출석 시 +5점 / 3분 이상 쓴 대출 상환 시 +15점 / 이자 때문에 라임이 마이너스가 되면 차감</div>
       </div>
 
       <div class="space-y-2 mb-3">
@@ -1621,29 +1770,29 @@ function openPanel(tab){
         <div class="flex items-center justify-between p-2.5 rounded-xl border border-[#d8cebe] bg-[#faf8f5]">
           <div>
             <div class="text-xs font-black text-[#2b2621]">청년 소액 신용대출 (+50🍋 확보)</div>
-            <div class="text-[10px] text-[#7a6e65]">금리: 이자 3🍋/분 (신용점수 600점 이상 가능)</div>
+            <div class="text-[10px] text-[#7a6e65]">금리: 이자 3🍋/시간 (신용점수 600점 이상 가능)</div>
           </div>
           <button type="button" onclick="takeLoan(50, 3, '청년 소액대출')" class="text-xs font-bold bg-[#f59e0b] text-white px-3 py-1.5 rounded-lg">대출받기</button>
         </div>
         <div class="flex items-center justify-between p-2.5 rounded-xl border border-[#d8cebe] bg-[#faf8f5]">
           <div>
             <div class="text-xs font-black text-[#2b2621]">방구석 마이너스 통장 (+150🍋 확보)</div>
-            <div class="text-[10px] text-[#7a6e65]">금리: 이자 10🍋/분 (신용점수 750점 이상 가능)</div>
+            <div class="text-[10px] text-[#7a6e65]">금리: 이자 10🍋/시간 (신용점수 750점 이상 가능)</div>
           </div>
           <button type="button" onclick="takeLoan(150, 10, '마이너스 통장')" class="text-xs font-bold bg-[#f59e0b] text-white px-3 py-1.5 rounded-lg">대출받기</button>
         </div>
       </div>
 
       <div class="space-y-2">
-        <div class="text-xs font-black text-[#2b2621] mb-1">📋 실행 중인 대출 목록 (총 원금: ${totalDebt}원)</div>`;
+        <div class="text-xs font-black text-[#2b2621] mb-1">📋 실행 중인 대출 목록 (총 원금: ${totalDebt}🍋)</div>`;
       if(!S.loans || S.loans.length===0){
         html+=`<div class="text-xs text-[#7a6e65] bg-white p-3 rounded-xl border border-[#ece5d5] text-center">현재 실행 중인 대출이 없습니다.</div>`;
       }else{
         S.loans.forEach((loan, idx)=>{
           html+=`<div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-[#ece5d5] text-xs">
             <div>
-              <div class="font-bold text-[#2b2621]">${loan.name}</div>
-              <div class="text-[10px] text-[#b64058]">원금: ${loan.principal}원 · 이자: ${loan.interestRate}🍋/분</div>
+              <div class="font-bold text-[#2b2621]">${esc(loan.name)}</div>
+              <div class="text-[10px] text-[#b64058]">원금: ${Number(loan.principal)||0}🍋 · 이자: ${Number(loan.interestRate)||0}🍋/시간</div>
             </div>
             <button type="button" onclick="repayLoan(${idx})" class="bg-[#85b032] text-white px-3 py-1 rounded-lg text-xs font-bold">원금 상환</button>
           </div>`;
@@ -1673,15 +1822,17 @@ function openPanel(tab){
       html+=`<div class="text-center py-4 bg-gradient-to-b from-[#fffbeb] to-[#fef3c7] border-2 border-[#f59e0b] rounded-xl mb-3 p-3">
         <div class="text-3xl mb-1">🎟️</div>
         <div class="text-sm font-black text-[#92400e]">인생역전 라임 즉석복권</div>
-        <div class="text-[11px] text-[#b45309] mt-1">1장 15🍋 · 최대 500🍋 당첨 기회!</div>
+        <div class="text-[11px] text-[#b45309] mt-1">1장 ${BAL.lottoCost}🍋 · 최대 500🍋 당첨 기회!</div>
+        <div class="text-[10px] text-[#92400e] mt-1">${LOTTO_TABLE.map((r,i)=>`${i+1}등 ${r.prize}🍋 ${r.p}%`).join(" · ")} · 꽝 ${(100-LOTTO_TABLE.reduce((a,r)=>a+r.p,0)).toFixed(1)}%</div>
         <div id="lotto-result-box" class="mt-2.5 py-2 px-3 bg-white/90 rounded-lg border border-[#fcd34d] text-xs font-extrabold text-[#2b2621] min-h-[34px] flex items-center justify-center">행운의 복권을 긁어보세요!</div>
-        <button type="button" onclick="scratchLotto()" class="mt-3 bg-[#f59e0b] hover:bg-[#d97706] text-white text-xs font-black px-5 py-2.5 rounded-xl shadow-md transition-transform active:scale-95">복권 긁기 (-15🍋)</button>
+        <button type="button" onclick="scratchLotto()" class="mt-3 bg-[#f59e0b] hover:bg-[#d97706] text-white text-xs font-black px-5 py-2.5 rounded-xl shadow-md transition-transform active:scale-95">복권 긁기 (-${BAL.lottoCost}🍋)</button>
       </div>`;
     }else{
       html+=`<div class="text-center py-4 bg-[#fcfbfa] border border-[#d8cebe] rounded-xl mb-3">
         <div class="text-2xl mb-1">📦</div>
-        <div class="text-xs font-bold text-[#2b2621]">택배 상자 까기 (1회 30🍋)</div>
-        <div class="text-[10px] text-[#7a6e65] mt-0.5">랜덤 보상 획득!</div>
+        <div class="text-xs font-bold text-[#2b2621]">택배 상자 까기 (1회 ${BAL.parcelCost}🍋)</div>
+        <div class="text-[10px] text-[#7a6e65] mt-0.5">체력·멘탈·EXP 회복템이 주로 나와요</div>
+        <div class="mt-2 mx-3 text-[10px] text-left text-[#5e554c] bg-white rounded-lg border border-[#ece5d5] p-2 leading-relaxed">${PARCEL_REWARDS.map(r=>`${r.emoji} ${esc(r.name)} <b>${r.w}%</b>`).join("<br>")}</div>
         <button type="button" onclick="openParcel()" class="mt-3 bg-[#e07a5f] hover:bg-[#d46545] text-white text-xs font-black px-4 py-2 rounded-xl shadow">택배 뜯기 📦</button>
       </div>`;
     }
@@ -1720,10 +1871,10 @@ function openPanel(tab){
 
     <div class="bg-[#f7fbe9] border-2 border-[#b2d264] p-3 rounded-xl mb-3">
       <div class="flex justify-between items-center mb-1.5">
-        <span class="text-xs font-black text-[#385d13]">자산 수입 & 대출 이자 정산 (분당)</span>
-        <span class="text-xs font-black text-[#7a5200]">순 패시브: +${(totalDividend + (REAL_ESTATE_ITEMS.find(x=>x.id===S.currentEstate)?.rent||0)) - totalLoanInterest}🍋 / 분</span>
+        <span class="text-xs font-black text-[#385d13]">자산 수입 & 대출 이자 (시간당)</span>
+        <span class="text-xs font-black text-[#7a5200]">순 패시브: ${(()=>{const v=Math.round(((totalDividend + (REAL_ESTATE_ITEMS.find(x=>x.id===S.currentEstate)?.rent||0)) - totalLoanInterest)*10)/10;return (v>=0?"+":"")+v;})()}🍋 / 시간</span>
       </div>
-      <div class="text-[11px] text-[#556b2f]">주식 배당금 + 부동산 임대수익에서 대출 이자(${totalLoanInterest}🍋)가 매분 자동 차감됩니다.</div>
+      <div class="text-[11px] text-[#556b2f]">배당 ${Math.round(totalDividend*10)/10}🍋 + 임대료에서 대출 이자 ${totalLoanInterest}🍋를 뺀 값을, 접속해 있는 동안 매분 나눠서 정산해요.</div>
     </div>`;
     bodyEl.innerHTML=html;
   }
@@ -1754,16 +1905,16 @@ function openPanel(tab){
         <div class="flex justify-between items-center mb-1">
           <div>
             <strong class="text-xs text-[#2b2621]">${st.name}</strong>
-            <span class="text-[10px] text-[#7a6e65] ml-1">(${st.id} · 배당 ${st.dividend}🍋)</span>
+            <span class="text-[10px] text-[#7a6e65] ml-1">(${st.id} · 배당 ${st.dividend}🍋/시간/주)</span>
           </div>
           <div class="text-right">
-            <span class="text-xs font-black text-[#2b2621] tabular-nums">${cur}원</span>
+            <span class="text-xs font-black text-[#2b2621] tabular-nums">${cur}🍋</span>
             <span class="text-[10px] font-bold ${diffColor} ml-1">${diffSign}${Math.abs(diff)} (${diffRate}%)</span>
           </div>
         </div>
         <div class="flex justify-between items-center text-[10px] text-[#7a6e65] bg-[#faf8f5] px-2 py-1 rounded mb-2">
           <span>보유 주식: <strong>${holding}주</strong></span>
-          <span>평단가: <strong>${avg}원</strong></span>
+          <span>평단가: <strong>${avg}🍋</strong></span>
         </div>
         <div class="grid grid-cols-4 gap-1.5">
           <button type="button" ${!mkt.isOpen?'disabled':''} onclick="tradeStock('${st.id}',1,true)" class="bg-[#85b032] hover:bg-[#739b28] text-white text-[11px] font-bold py-1.5 rounded-lg ${btnStyle}">매수 1</button>
@@ -1773,14 +1924,16 @@ function openPanel(tab){
         </div>
       </div>`;
     });
-    html+=`</div><div class="text-center text-[11px] font-bold text-[#4a6b1e]">보유 라임: 🍋 ${S.gold}</div>`;
+    html+=`</div><div class="text-center text-[11px] font-bold text-[#4a6b1e]">보유 라임: 🍋 ${S.gold}</div>
+    <div class="text-center text-[10px] text-[#7a6e65] mt-1">거래 수수료 ${Math.round(BAL.tradeFeeRate*100)}% (최소 1🍋) · 배당은 접속 중 매분 나눠서 지급</div>`;
     bodyEl.innerHTML=html;
   }
   else if(tab==="study"){
     let html=`<div class="text-center py-4 bg-[#fcfbfa] border border-[#d8cebe] rounded-xl">
       <div class="text-3xl mb-1">⏱️</div>
       <div class="text-xl font-black text-[#2b2621] mb-2" id="timer-display">${formatTime(S.studySeconds)}</div>
-      <div class="text-xs text-[#7a6e65] mb-4">집중하여 코딩이나 공부를 진행하면 레벨 경험치와 라임 보상이 쌓습니다.</div>
+      <div class="text-xs text-[#7a6e65] mb-1">집중한 ${BAL.studyEverySec/60}분마다 +${BAL.studyExp} EXP · +${BAL.studyGold}🍋</div>
+      <div class="text-[10px] text-[#7a6e65] mb-4">오늘 받은 보상 ${(S.studyReward&&S.studyReward.date===todayKey())?S.studyReward.count:0} / ${BAL.studyDailyCap}회</div>
       <div class="flex justify-center gap-2">
         <button type="button" onclick="toggleStudyTimer()" id="timer-toggle-btn" class="px-5 py-2 rounded-xl text-xs font-bold text-white ${S.studyRunning?'bg-[#d45c6e]':'bg-[#85b032]'}">${S.studyRunning?'타이머 일시정지':'집중 시작'}</button>
         <button type="button" onclick="resetStudyTimer()" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#eef4e2] text-[#4a6b1e] border border-[#c4db9b]">초기화</button>
@@ -1840,12 +1993,13 @@ function openPanel(tab){
     bodyEl.innerHTML=`<div class="space-y-2">
       <button type="button" onclick="startBugGameModal()" class="w-full text-left p-3 rounded-xl border-2 border-[#b2d264] bg-[#f7fbe9] hover:bg-[#eef7d8] transition-all">
         <div class="text-sm font-black text-[#2b2621]">💻 에러 코드 타자 디버깅</div>
-        <div class="text-[11px] text-[#7a6e65] mt-0.5">5분 마라톤 · 해결 1개당 3🍋 · 최고 기록 ${S.bestBugScore||0}개</div>
+        <div class="text-[11px] text-[#7a6e65] mt-0.5">5분 마라톤 · 해결 1개당 ${BAL.bugGoldPerSolve}🍋 · 최고 기록 ${S.bestBugScore||0}개</div>
       </button>
       <button type="button" onclick="startSuikaGame()" class="w-full text-left p-3 rounded-xl border-2 border-[#f2c6b6] bg-[#fff8ed] hover:bg-[#fdeedd] transition-all">
         <div class="text-sm font-black text-[#2b2621]">🍉 과일 합치기 (15단계)</div>
-        <div class="text-[11px] text-[#7a6e65] mt-0.5">같은 과일을 합치면 라임 획득 · 최고 점수 ${S.bestSuika||0}점</div>
+        <div class="text-[11px] text-[#7a6e65] mt-0.5">점수 ${BAL.suikaScorePerGold}점당 1🍋 (끝날 때 정산) · 최고 점수 ${S.bestSuika||0}점</div>
       </button>
+      <div class="text-center text-[10px] font-bold text-[#7a6e65] pt-1">미니게임 라임은 하루 최대 ${BAL.miniDailyCap}🍋 · 오늘 ${miniLeftToday()}🍋 남음</div>
     </div>`;
   }
 
@@ -1858,10 +2012,6 @@ function closePanel(){
   currentOpenTab=null;
 }
 
-const LOAN_PRODUCTS = {
-  small: { id: "small", name: "청년 소액대출", principal: 50, interestRate: 3, minCredit: 600 },
-  minus: { id: "minus", name: "방구석 마이너스 통장", principal: 150, interestRate: 10, minCredit: 750 }
-};
 
 function isPositiveInt(val) {
   return typeof val === "number" && Number.isSafeInteger(val) && val > 0;
@@ -1931,6 +2081,7 @@ window.repayLoan = function(index) {
 };
 
 window.equipEstate = function(id) {
+  if (!(S.ownedRealEstate || []).includes(id) || !REAL_ESTATE_ITEMS.some(x => x.id === id)) { showFloat("먼저 부동산을 매입해 주세요!"); return; }
   S.currentEstate = id;
   save();
   applyCosmetics();
@@ -1964,6 +2115,7 @@ window.buyEstate = function(id) {
 
 window.equipSkin = function(id) {
   if (id !== "default" && !(S.ownedSkins || []).includes(id)) { showFloat("먼저 스킨을 구매해 주세요!"); return; }
+  if (!ROOM_SKIN_ITEMS.some(x => x.id === id)) return;
   if (!S.estateSkins || typeof S.estateSkins !== "object") S.estateSkins = {};
   S.estateSkins[S.currentEstate] = id;
   save(); applyCosmetics(); openPanel("shop");
@@ -1993,6 +2145,7 @@ window.buySkin = function(id) {
 };
 
 window.equipTheme = function(id) {
+  if (!(S.ownedThemes || []).includes(id) || !UI_THEMES.some(x => x.id === id)) { showFloat("먼저 테마를 구매해 주세요!"); return; }
   S.currentTheme = id;
   save();
   applyCosmetics();
@@ -2024,31 +2177,26 @@ window.buyTheme = function(id) {
   updateHUD();
 };
 window.openParcel=function(){
-  if(S.gold<30){showFloat("🍋 택배비(30라임)가 부족합니다!");return;}
-  S.gold-=30;
+  if(S.gold<BAL.parcelCost){showFloat(`🍋 택배비(${BAL.parcelCost}라임)가 부족합니다!`);return;}
+  S.gold-=BAL.parcelCost;
   updateHUD();
-  const rew=PARCEL_REWARDS[Math.floor(Math.random()*PARCEL_REWARDS.length)];
+  const rew=pickWeighted(PARCEL_REWARDS);
   if(rew.type==="gold")S.gold+=rew.val;
   else if(rew.type==="stamina")S.stamina=clamp(S.stamina+rew.val,0,100);
   else if(rew.type==="mental")S.mental=clamp(S.mental+rew.val,0,100);
   else if(rew.type==="exp")S.exp+=rew.val;
-  S.parcelHistory.push(rew);
+  S.parcelHistory.push({name:rew.name,type:rew.type,val:rew.val,rarity:rew.rarity,emoji:rew.emoji});
+  if(S.parcelHistory.length>50) S.parcelHistory=S.parcelHistory.slice(-50);
   save();
   showFloat(`🎁 택배 개봉: ${rew.emoji} ${rew.name}!`);
   openPanel("shop");
 };
 
 window.scratchLotto=function(){
-  if(S.gold<15){showFloat("🍋 돈(라임)이 부족합니다! (15🍋 필요)");return;}
-  S.gold-=15;
-  const r=Math.random()*100;
-  let prize=0;
-  let msg="";
-  if(r<1){prize=500;msg="🎊 대박! 1등 당첨! (+500🍋)";}
-  else if(r<6){prize=100;msg="🎉 축하합니다! 2등 당첨! (+100🍋)";}
-  else if(r<31){prize=30;msg="✨ 3등 당첨! 본전 두 배! (+30🍋)";}
-  else if(r<61){prize=10;msg="🍀 4등 당첨! (+10🍋)";}
-  else{prize=0;msg="💨 꽝! 다음 기회에 도전하세요...";}
+  if(S.gold<BAL.lottoCost){showFloat(`🍋 돈(라임)이 부족합니다! (${BAL.lottoCost}🍋 필요)`);return;}
+  S.gold-=BAL.lottoCost;
+  let r=Math.random()*100, prize=0, msg="💨 꽝! 다음 기회에 도전하세요...";
+  for(const row of LOTTO_TABLE){ if(r<row.p){prize=row.prize;msg=row.msg;break;} r-=row.p; }
   S.gold+=prize;
   save();
   updateHUD();
@@ -2062,34 +2210,41 @@ window.tradeStock=function(id,qty,isBuy){
   const mkt=getMarketStatus();
   if(!mkt.isOpen){showFloat("❌ 장 마감 시간(주말/평일 15:30 이후)에는 매수·매도가 불가능합니다!");return;}
 
+  // [보안] 정의된 종목·양의 정수 수량만 허용 (문자열/소수/음수 → 라임이 NaN이 되던 문제)
+  if(!STOCK_DEFS.some(sd=>sd.id===id)){showFloat("❌ 존재하지 않는 종목입니다!");return;}
+  if(typeof isBuy!=="boolean")return;
+  sanitizeGameNumbers();
   const cur=S.stocks.prices[id];
   const holding=S.stocks.holdings[id]||0;
   const avg=S.stocks.avgCost[id]||0;
+  if(!isPositiveInt(cur))return;
 
   let tradeQty=qty;
+  const fee=v=>Math.max(1,Math.round(v*BAL.tradeFeeRate));
   if(qty==="MAX"){
-    if(isBuy)tradeQty=Math.floor(S.gold/cur);
+    if(isBuy)tradeQty=Math.floor(Math.max(0,S.gold-1)/(cur*(1+BAL.tradeFeeRate)));
     else tradeQty=holding;
   }
+  if(!Number.isSafeInteger(tradeQty)||tradeQty>1e6){showFloat("❌ 올바르지 않은 수량입니다!");return;}
 
   if(tradeQty<=0){showFloat(isBuy?"🍋 구매 가능한 라임이 부족합니다!":"매도할 주식이 없습니다!");return;}
 
   if(isBuy){
-    const cost=cur*tradeQty;
-    if(S.gold<cost){showFloat(`❌ 돈(라임)이 부족합니다! (필요: ${cost}🍋)`);return;}
+    const value=cur*tradeQty, f=fee(value), cost=value+f;
+    if(S.gold<cost){showFloat(`❌ 돈(라임)이 부족합니다! (필요: ${cost}🍋, 수수료 ${f} 포함)`);return;}
     S.gold-=cost;
     const newHolding=holding+tradeQty;
     const newAvg=Math.round(((holding*avg)+cost)/newHolding);
     S.stocks.holdings[id]=newHolding;
     S.stocks.avgCost[id]=newAvg;
-    showFloat(`📈 ${id} ${tradeQty}주 매수 완료!`);
+    showFloat(`📈 ${id} ${tradeQty}주 매수 완료! (수수료 ${f}🍋)`);
   }else{
     if(holding<tradeQty){showFloat("❌ 보유 주식이 부족합니다!");return;}
-    const revenue=cur*tradeQty;
+    const value=cur*tradeQty, f=fee(value), revenue=Math.max(0,value-f);
     S.gold+=revenue;
     S.stocks.holdings[id]=holding-tradeQty;
     if(S.stocks.holdings[id]===0)S.stocks.avgCost[id]=0;
-    showFloat(`📉 ${id} ${tradeQty}주 매도 완료!`);
+    showFloat(`📉 ${id} ${tradeQty}주 매도 완료! (+${revenue}🍋, 수수료 ${f}🍋)`);
   }
   save();
   updateHUD();
@@ -2132,6 +2287,7 @@ function renderActions(){
 }
 
 function setAction(id, skipSave){
+  if(!ACTION_IDS.includes(id)) id="reels";
   S.action=id;
   const a=ACTIONS.find(x=>x.id===id)||ACTIONS[0];
   const avatarEl=document.getElementById("char-avatar");
@@ -2168,8 +2324,9 @@ window.promptAddCategory=async function(){
   if(!name || !name.trim())return;
   const trimmed=name.trim();
   const id="cat_"+Date.now();
-  if(!Array.isArray(S.categories))S.categories=DEFAULT_CATEGORIES;
-  S.categories.push({id:id, label:trimmed, icon:"📌"});
+  if(!Array.isArray(S.categories))S.categories=DEFAULT_CATEGORIES.map(c=>({...c}));
+  if(S.categories.length>=MAX_CATEGORIES){showFloat("카테고리는 최대 "+MAX_CATEGORIES+"개까지 만들 수 있어요.");return;}
+  S.categories.push({id:id, label:trimmed.slice(0,CAT_LABEL_MAX), icon:"📌"});
   save();
   renderPlanner();
 };
@@ -2180,7 +2337,7 @@ window.editCategory=async function(catId, e){
   if(!cat)return;
   const newName=await limeDialog("카테고리 이름을 수정하세요:",true,cat.label);
   if(!newName || !newName.trim())return;
-  cat.label=newName.trim();
+  cat.label=newName.trim().slice(0,CAT_LABEL_MAX);
   save();
   renderPlanner();
 };
@@ -2205,7 +2362,7 @@ window.carryOverTodos=function(){
   let count=0;
   uncompleted.forEach(item=>{
     const exists=S.todos.some(t=>t.date===selectedPlannerDate && t.text===item.text);
-    if(!exists){
+    if(!exists && S.todos.length<MAX_TODOS){
       S.todos.push({id:"todo_"+Date.now()+"_"+Math.random().toString(36).substr(2,4), text:item.text, cat:item.cat, date:selectedPlannerDate, done:false});
       count++;
     }
@@ -2227,8 +2384,9 @@ window.toggleInlineAddBox=function(catId, e){
 window.submitInlineAdd=function(catId){
   const input=document.getElementById("inline-input-"+catId);
   if(!input)return;
-  const val=input.value.trim();
+  const val=input.value.trim().slice(0,TODO_TEXT_MAX);
   if(!val)return;
+  if(S.todos.length>=MAX_TODOS){showFloat("할 일이 너무 많아요. 오래된 할 일을 정리해 주세요.");return;}
   S.todos.push({id:"todo_"+Date.now()+"_"+Math.random().toString(36).substr(2,4), text:val, cat:catId, date:selectedPlannerDate, done:false});
   activeInputCatId=null;
   save();
@@ -2279,7 +2437,7 @@ function renderPlanner(){
   const countEl=document.getElementById("quick-todo-count");
   if(listEl){
     listEl.innerHTML="";
-    if(!Array.isArray(S.categories))S.categories=DEFAULT_CATEGORIES;
+    if(!Array.isArray(S.categories))S.categories=DEFAULT_CATEGORIES.map(c=>({...c}));
     const leftCount=S.todos.filter(t=>t.date===selectedPlannerDate && !t.done).length;
     if(countEl)countEl.textContent=`${leftCount}개 남음`;
 
@@ -2307,7 +2465,7 @@ let itemsHtml="";
       const safeCatId=esc(cat.id);
       let inlineBoxHtml = activeInputCatId===cat.id?`
         <div class="inline-add-box">
-          <input type="text" id="inline-input-${safeCatId}" class="inline-add-input" placeholder="새로운 할 일을 입력하세요..." onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)submitInlineAdd('${safeCatId}')" />
+          <input type="text" maxlength="${TODO_TEXT_MAX}" id="inline-input-${safeCatId}" class="inline-add-input" placeholder="새로운 할 일을 입력하세요..." onkeydown="if(event.key==='Enter'&&!event.isComposing&&event.keyCode!==229)submitInlineAdd('${safeCatId}')" />
           <button type="button" class="inline-add-submit" onclick="submitInlineAdd('${safeCatId}')">추가</button>
           <button type="button" class="inline-add-cancel" onclick="activeInputCatId=null;renderPlanner();">취소</button>
         </div>
@@ -2344,17 +2502,26 @@ function createDayCell(strip,dStr,domVal,isOther){
   strip.appendChild(btn);
 }
 
+const TODO_REWARD_DAILY_CAP=BAL.todoDailyCap; // 하루에 보상을 주는 할 일 완료 수
 window.toggleTodo=function(id,checked){
+  checked=checked===true;
   const item=S.todos.find(x=>x.id===id);
   if(!item)return;
   item.done=checked;
   if(checked && !item.rewarded){
     item.rewarded=true;
     unlockAchievement("todo1");
-    S.exp+=15;
-    S.gold+=10;
-    S.creditScore=clamp(S.creditScore+3, 300, 1000);
-    showFloat("할 일 완료! (+15 EXP, +10🍋, 신용점수 +3점)");
+    const tk=todayKey();
+    if(!S.todoReward||S.todoReward.date!==tk) S.todoReward={date:tk,count:0};
+    if(S.todoReward.count>=TODO_REWARD_DAILY_CAP){
+      showFloat(`할 일 완료! (오늘 보상 한도 ${TODO_REWARD_DAILY_CAP}개를 다 받았어요)`);
+    }else{
+      S.todoReward.count++;
+      S.exp+=BAL.todoExp;
+      S.gold+=BAL.todoGold;
+      S.creditScore=clamp(S.creditScore+3, 300, 1000);
+      showFloat(`할 일 완료! (+${BAL.todoExp} EXP, +${BAL.todoGold}🍋, 신용점수 +3점)`);
+    }
   }else if(!checked){
     S.creditScore=clamp(S.creditScore-2, 300, 1000);
   }
@@ -2385,8 +2552,8 @@ function updateHUD(skipSave){
   const netWorth = S.gold + totalStockVal + currentEst.value - totalDebt;
   const netWorthEl = document.getElementById("stat-networth");
   const totalDebtEl = document.getElementById("stat-totaldebt");
-  if(netWorthEl) netWorthEl.textContent = netWorth + "원";
-  if(totalDebtEl) totalDebtEl.textContent = totalDebt + "원";
+  if(netWorthEl) netWorthEl.textContent = netWorth + "🍋";
+  if(totalDebtEl) totalDebtEl.textContent = totalDebt + "🍋";
 
   const expNeeded=S.level*100;
   if(S.exp>=expNeeded){
@@ -2401,6 +2568,7 @@ function updateHUD(skipSave){
 }
 
 let lastDividendTick = Date.now();
+let lastLatePenalty = 0;
 let lastMarketTick = Date.now();
 let lastCloudTickSave = Date.now();
 
@@ -2421,11 +2589,17 @@ setInterval(()=>{
       S.loans.forEach(l => totalInterest += l.interestRate);
     }
 
-    const netIncome = totalIncome - totalInterest;
-    S.gold += netIncome;
-    if(S.gold<0 && totalInterest>0){ S.creditScore=clamp(S.creditScore-10,300,1000); showFloat("⚠️ 이자 미납! 신용점수 -10점"); }
-    if(netIncome !== 0){
-      showFloat(`패시브 정산 완료! (수익 +${totalIncome}🍋 - 대출이자 ${totalInterest}🍋)`);
+    // [밸런스] 모든 패시브 값은 '시간당' → 1분에 1/60씩, 정수가 안 되는 부분은 다음 정산으로 이월
+    S.passiveCarry=(Number(S.passiveCarry)||0)+(totalIncome-totalInterest)/60;
+    const whole=Math.trunc(S.passiveCarry);
+    S.passiveCarry-=whole;
+    if(whole!==0){
+      S.gold += whole;
+      // 이자 때문에 마이너스면 신용점수 차감 (10분에 한 번까지)
+      if(S.gold<0 && totalInterest>0 && now-lastLatePenalty>=600000){
+        lastLatePenalty=now;
+        S.creditScore=clamp(S.creditScore-10,300,1000); showFloat("⚠️ 이자 미납! 신용점수 -10점");
+      }
       save();
       updateHUD();
     }
@@ -2439,10 +2613,17 @@ setInterval(()=>{
   if(S.studyRunning){
     S.studySeconds+=1;
     const tdEl=document.getElementById("timer-display"); if(tdEl)tdEl.textContent=formatTime(S.studySeconds);
-    if(S.studySeconds%60===0){
-      S.exp+=20;
-      S.gold+=15;
-      showFloat("집중 보상 지급! (+20 EXP, +15🍋)");
+    if(S.studySeconds%BAL.studyEverySec===0){
+      const tk=todayKey();
+      if(!S.studyReward||S.studyReward.date!==tk) S.studyReward={date:tk,count:0};
+      if(S.studyReward.count<BAL.studyDailyCap){
+        S.studyReward.count++;
+        S.exp+=BAL.studyExp;
+        S.gold+=BAL.studyGold;
+        showFloat(`집중 보상 지급! (+${BAL.studyExp} EXP, +${BAL.studyGold}🍋)`);
+      }else{
+        showFloat("오늘 집중 보상 한도를 다 받았어요. 시간 기록은 계속돼요!");
+      }
       save();
     }
   }
@@ -2503,14 +2684,14 @@ document.addEventListener("DOMContentLoaded",()=>{
   const bigInput=document.getElementById("tm-bigevent-input");
   const bigChk=document.getElementById("tm-bigevent-chk");
   if(bigInput){
-    bigInput.onblur=()=>{ S.bigEvent=bigInput.value.trim(); save(); renderCoreGoalRoom(); };
+    bigInput.onblur=()=>{ S.bigEvent=bigInput.value.trim().slice(0,GOAL_TEXT_MAX); save(); renderCoreGoalRoom(); };
   }
   if(bigChk){ bigChk.onchange=()=>{ S.bigEventSuccess=bigChk.checked; save(); renderCoreGoalRoom(); }; }
 
   const coreInput=document.getElementById("tm-coregoal-input");
   const coreChk=document.getElementById("tm-coregoal-chk");
   if(coreInput){
-    coreInput.onblur=()=>{ S.coreGoal=coreInput.value.trim(); save(); renderCoreGoalRoom(); };
+    coreInput.onblur=()=>{ S.coreGoal=coreInput.value.trim().slice(0,GOAL_TEXT_MAX); save(); renderCoreGoalRoom(); };
   }
   if(coreChk){ coreChk.onchange=()=>{ S.coreGoalSuccess=coreChk.checked; save(); renderCoreGoalRoom(); }; }
 
@@ -2566,18 +2747,80 @@ const bugGameArea = document.getElementById("bug-game-area");
 const bugStartBtn = document.getElementById("bug-start-btn");
 const bugStartGuide = document.getElementById("bug-start-guide");
 const bugInput = document.getElementById("bug-input");
+const bugForm = document.getElementById("bug-form");
+const bugSubmitBtn = document.getElementById("bug-submit-btn");
+const bugStopBtn = document.getElementById("bug-stop-btn");
+const bugFeedbackEl = document.getElementById("bug-feedback");
+const bugLineEl = document.getElementById("bug-line");
+// [수정] 낙하 속도를 픽셀이 아닌 '경계선까지 걸리는 시간'으로 계산 → 모바일에서 키보드가 올라와 게임판이 짧아져도 난이도가 같다
+const BUG_FALL_SEC = 32;
+const BUG_GUIDE_HTML = bugStartGuide.innerHTML;
+
+// [수정] 모바일: 키보드가 올라오면 보이는 화면(visualViewport) 높이에 맞춰 모달을 줄여 입력창이 가려지지 않게 한다
+function fitBugModal(){
+  if(bugModal.style.display==="none") return;
+  const vv=window.visualViewport;
+  if(vv){ bugModal.style.height=vv.height+"px"; bugModal.style.top=vv.offsetTop+"px"; }
+  else{ bugModal.style.height=window.innerHeight+"px"; bugModal.style.top="0px"; }
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",fitBugModal);
+  window.visualViewport.addEventListener("scroll",fitBugModal);
+}
+window.addEventListener("resize",fitBugModal);
+
+// [수정] 게임 안내 메시지는 화면 하단 토스트(입력창을 가림) 대신 게임판 상단에 표시
+let bugFeedbackTimer=null;
+function bugFlash(msg,color){
+  bugFeedbackEl.textContent=msg;
+  bugFeedbackEl.style.color=color||"#fff";
+  bugFeedbackEl.style.display="block";
+  if(bugFeedbackTimer) clearTimeout(bugFeedbackTimer);
+  bugFeedbackTimer=setTimeout(()=>{bugFeedbackEl.style.display="none";},1200);
+}
+function bugLimitY(el){
+  // 에러 박스의 '아랫변'이 경계선에 닿는 순간 = 침범
+  const lineY=bugLineEl.offsetTop+bugLineEl.offsetHeight; // 점선(아랫변) 위치
+  return Math.max(20, lineY-(el?el.offsetHeight:24));
+}
+function setBugInputEnabled(on){
+  bugInput.disabled=!on; bugSubmitBtn.disabled=!on;
+  bugStopBtn.style.display=on?"":"none";
+}
+function clearBugIntervals(){
+  clearInterval(bugTimerInterval); clearInterval(bugSpawnInterval); clearInterval(bugMoveInterval);
+  bugTimerInterval=bugSpawnInterval=bugMoveInterval=null;
+}
 
 window.startBugGameModal = function(){
   closePanel();
   switchBgmTrack("arcade");
   bugModal.style.display="flex";
+  fitBugModal();
   bugGameRunning=false; bugScore=0; bugMissed=0; bugTimeLeft=300;
   updateBugHUD();
   bugStartBtn.style.display="block";
   bugStartGuide.style.display="flex";
   bugGameArea.querySelectorAll('.error-code-item').forEach(el=>el.remove());
-  bugInput.disabled=true; bugInput.value="";
+  bugStartGuide.innerHTML=BUG_GUIDE_HTML;
+  bugStartBtn.textContent="디버깅 시작하기";
+  setBugInputEnabled(false); bugInput.value="";
 };
+
+function spawnBugError(){
+  if(!bugGameRunning) return;
+  const text=(arr=>arr[Math.floor(Math.random()*arr.length)])(Math.random()>0.6?LONG_ERRORS:Math.random()>0.3?MID_ERRORS:SHORT_ERRORS) + Math.floor(Math.random()*90+10);
+  const el=document.createElement("div");
+  el.className="error-code-item absolute text-xs sm:text-sm font-mono font-black text-red-400 bg-black/80 border border-red-500/70 px-2 py-1 rounded shadow-lg select-none whitespace-nowrap transition-colors";
+  el.textContent=text;
+  el.style.top="6px"; el.style.left="0px"; el.style.visibility="hidden";
+  bugGameArea.appendChild(el);
+  // [수정] 실제 글자 박스 폭을 재서 좁은 모바일 화면에서도 오른쪽으로 잘리지 않게 배치
+  const maxX=Math.max(4, bugGameArea.clientWidth-el.offsetWidth-4);
+  el.style.left=Math.floor(4+Math.random()*(maxX-4))+"px";
+  el.style.visibility="visible";
+  activeErrors.push({text, element:el, p:0, crossed:false});
+}
 
 function startBugGame(){
   bugScore=0; bugMissed=0; bugTimeLeft=300; bugGameRunning=true; activeErrors=[];
@@ -2585,11 +2828,10 @@ function startBugGame(){
   bugStartBtn.style.display="none";
   bugStartGuide.style.display="none";
   bugGameArea.querySelectorAll('.error-code-item').forEach(el=>el.remove());
-  bugInput.disabled=false; bugInput.value=""; bugInput.focus();
+  setBugInputEnabled(true); bugInput.value=""; bugInput.focus();
+  fitBugModal();
 
-  if(bugTimerInterval) clearInterval(bugTimerInterval);
-  if(bugSpawnInterval) clearInterval(bugSpawnInterval);
-  if(bugMoveInterval) clearInterval(bugMoveInterval);
+  clearBugIntervals();
 
   bugTimerInterval=setInterval(()=>{
     bugTimeLeft--;
@@ -2597,72 +2839,111 @@ function startBugGame(){
     if(bugTimeLeft<=0) endBugGame();
   },1000);
 
-  bugSpawnInterval=setInterval(()=>{
-    if(!bugGameRunning) return;
-    const text=(arr=>arr[Math.floor(Math.random()*arr.length)])(Math.random()>0.6?LONG_ERRORS:Math.random()>0.3?MID_ERRORS:SHORT_ERRORS) + Math.floor(Math.random()*90+10);
-    const el=document.createElement("div");
-    el.className="error-code-item absolute text-xs sm:text-sm font-mono font-black text-red-400 bg-black/80 border border-red-500/70 px-2.5 py-1 rounded shadow-lg select-none";
-    el.textContent=text;
-    const rx=Math.floor(Math.random()*Math.max(20, bugGameArea.clientWidth-140));
-    el.style.left=rx+"px"; el.style.top="10px";
-    activeErrors.push({text, element:el, y:10, crossed:false});
-    bugGameArea.appendChild(el);
-  },3500);
+  spawnBugError();
+  bugSpawnInterval=setInterval(spawnBugError,3500);
 
+  let lastMove=performance.now();
   bugMoveInterval=setInterval(()=>{
+    const now=performance.now(), dt=Math.min(0.2,(now-lastMove)/1000); lastMove=now;
     if(!bugGameRunning) return;
-    const limitY=bugGameArea.clientHeight-60;
-    activeErrors.forEach(err=>{
-      err.y+=0.6;
-      err.element.style.top=err.y+"px";
-      if(!err.crossed && err.y>=limitY){
+    const areaH=bugGameArea.clientHeight;
+    for(let i=activeErrors.length-1;i>=0;i--){
+      const err=activeErrors[i];
+      err.p+=dt/BUG_FALL_SEC;
+      const limitY=bugLimitY(err.element);
+      const y=6+err.p*(limitY-6);
+      err.element.style.top=y+"px";
+      if(!err.crossed && err.p>=1){
+        // [수정] 경계선을 넘은 에러는 회색으로 바뀌고 더 이상 입력으로 해결할 수 없다
         err.crossed=true; bugMissed++;
+        err.element.classList.remove("text-red-400","border-red-500/70");
+        err.element.classList.add("text-gray-500","border-gray-600","line-through");
         bugTimeLeft=Math.max(0, bugTimeLeft-5);
-        showFloat("⚠️ 에러 경계선 침범! (-5초)");
+        bugFlash("⚠️ 경계선 침범! (-5초)","#fca5a5");
         updateBugHUD();
       }
-    });
+      // 넘어간 에러는 게임판 아래로 빠지면 지운다
+      if(err.crossed && y>areaH){ err.element.remove(); activeErrors.splice(i,1); }
+    }
+    if(bugTimeLeft<=0) endBugGame();
   },50);
 }
 
-bugInput.onkeydown=(e)=>{
-  if(e.key==="Enter" && !e.isComposing && e.keyCode!==229 && bugGameRunning){
-    const typed=bugInput.value.trim();
-    bugInput.value="";
-    if(!typed) return;
-    const matchIdx=activeErrors.findIndex(err=>err.text===typed);
-    if(matchIdx!==-1){
-      activeErrors[matchIdx].element.remove();
-      activeErrors.splice(matchIdx,1);
-      bugScore++; bugTimeLeft+=5;
-      showFloat("✨ 디버깅 성공! (+5초)");
-      updateBugHUD();
-    }else{
-      bugTimeLeft=Math.max(0, bugTimeLeft-5);
-      showFloat("❌ 오타 발생! (-5초)");
-      updateBugHUD();
-    }
+// [수정] 모바일 한글 키보드는 keydown이 keyCode 229로 와서 엔터가 안 먹는 경우가 있어
+// form submit(엔터·키보드 '보내기'·입력 버튼 모두 여기로 옴)으로 처리한다
+function submitBugInput(){
+  if(!bugGameRunning) return;
+  const typed=bugInput.value.trim();
+  bugInput.value="";
+  bugInput.focus();
+  if(!typed) return;
+  const matchIdx=activeErrors.findIndex(err=>!err.crossed && err.text===typed);
+  if(matchIdx!==-1){
+    activeErrors[matchIdx].element.remove();
+    activeErrors.splice(matchIdx,1);
+    bugScore++; bugTimeLeft+=5;
+    bugFlash("✨ 디버깅 성공! (+5초)","#bef264");
+  }else if(activeErrors.some(err=>err.crossed && err.text===typed)){
+    bugTimeLeft=Math.max(0, bugTimeLeft-5);
+    bugFlash("🚫 이미 경계선을 넘은 에러예요 (-5초)","#fca5a5");
+  }else{
+    bugTimeLeft=Math.max(0, bugTimeLeft-5);
+    bugFlash("❌ 오타 발생! (-5초)","#fca5a5");
   }
+  updateBugHUD();
+}
+bugForm.addEventListener("submit",e=>{e.preventDefault();submitBugInput();});
+let bugPendingSubmit=false;
+bugInput.onkeydown=(e)=>{
+  // PC: 한글 마지막 글자 조합 중에 엔터 → 조합이 끝난 직후 한 번에 제출 (엔터 두 번 안 눌러도 됨)
+  if(e.key==="Enter" && e.isComposing){ e.preventDefault(); bugPendingSubmit=true; }
 };
+bugInput.addEventListener("compositionend",()=>{
+  if(!bugPendingSubmit) return;
+  bugPendingSubmit=false;
+  setTimeout(submitBugInput,0);
+});
+// 입력 버튼을 눌러도 키보드가 내려가지 않게 포커스 유지
+bugSubmitBtn.addEventListener("pointerdown",e=>{ if(!bugSubmitBtn.disabled) e.preventDefault(); });
 
 function updateBugHUD(){
-  bugTimerEl.textContent=`남은 시간: ${Math.floor(bugTimeLeft/60).toString().padStart(2,'0')}:${(bugTimeLeft%60).toString().padStart(2,'0')}`;
-  bugScoreEl.textContent=`해결한 에러: ${bugScore}개 | 놓친 에러: ${bugMissed}개`;
+  const t=Math.max(0,bugTimeLeft);
+  bugTimerEl.textContent=`⏱ ${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toString().padStart(2,'0')}`;
+  bugScoreEl.textContent=`✅ 해결 ${bugScore} · ❌ 놓침 ${bugMissed}`;
 }
 
 function endBugGame(){
+  if(!bugGameRunning) return;
   bugGameRunning=false;
-  clearInterval(bugTimerInterval); clearInterval(bugSpawnInterval); clearInterval(bugMoveInterval);
-  bugInput.disabled=true;
+  clearBugIntervals();
+  setBugInputEnabled(false);
+  bugInput.blur();
   activeErrors.forEach(err=>err.element.remove());
   activeErrors=[];
   bugStartBtn.style.display="block";
-  const earnedLime=Math.floor(bugScore*3);
-  if(earnedLime>0){ S.gold+=earnedLime; if(bugScore>(S.bestBugScore||0)) S.bestBugScore=bugScore; save(); updateHUD(); showFloat(`디버깅 완료 보상 +${earnedLime}🍋!`); }
+  bugStartBtn.textContent="다시 시작하기";
+  const wanted=Math.floor(bugScore*BAL.bugGoldPerSolve);
+  const earnedLime=grantMiniGold(wanted);
+  const isBest=bugScore>(S.bestBugScore||0);
+  if(isBest) S.bestBugScore=bugScore;
+  if(earnedLime>0||isBest){ save(); updateHUD(); }
+  bugStartGuide.innerHTML=`🏁 게임 종료<br>해결 ${bugScore}개 · 놓침 ${bugMissed}개<br>보상 +${earnedLime}🍋${earnedLime<wanted?' (오늘 미니게임 한도 도달)':''}${isBest?'<br>🏆 최고 기록 갱신!':''}`;
+  bugStartGuide.style.display="flex";
+  if(earnedLime>0) showFloat(`디버깅 완료 보상 +${earnedLime}🍋!`);
 }
 
 bugStartBtn.onclick=startBugGame;
-document.getElementById("bug-close-btn").onclick=()=>{ bugGameRunning=false; clearInterval(bugTimerInterval); clearInterval(bugSpawnInterval); clearInterval(bugMoveInterval); bugModal.style.display="none"; switchBgmTrack("calm"); };
+// [추가] 그만하기: 지금까지 해결한 만큼 보상 받고 종료 (창은 유지)
+bugStopBtn.onclick=endBugGame;
+// [수정] 나가기: 진행 중이면 먼저 정산한 뒤 닫는다 (이전에는 보상이 사라졌음)
+document.getElementById("bug-close-btn").onclick=()=>{
+  if(bugGameRunning) endBugGame();
+  clearBugIntervals();
+  bugModal.style.display="none";
+  bugModal.style.top="0px";
+  bugStartBtn.textContent="디버깅 시작하기";
+  switchBgmTrack("calm");
+};
 
 const FRUIT_ART_BASE = "https://gpdlsdywjd-lgtm.github.io/-/minigame-fruits/";
 const FRUIT_TIERS=[
@@ -2692,21 +2973,27 @@ FRUIT_TIERS.forEach(t => { t.radius = Math.round(t.radius * FRUIT_SCALE); });
 const FRUIT_BOX = [];
 function measureFruitBox(img, tier){
   try{
-    const w = img.naturalWidth, h = img.naturalHeight;
-    if(!w || !h) return;
+    const nw = img.naturalWidth, nh = img.naturalHeight;
+    if(!nw || !nh) return;
+    // [수정] 큰 원본을 256px로 줄여서 측정 (속도), 결과는 원본 좌표로 환산
+    const sc = Math.min(1, 256 / Math.max(nw, nh)), w = Math.round(nw * sc), h = Math.round(nh * sc);
     const c = document.createElement("canvas"); c.width = w; c.height = h;
-    const g = c.getContext("2d"); g.drawImage(img, 0, 0);
+    const g = c.getContext("2d"); g.drawImage(img, 0, 0, w, h);
     const d = g.getImageData(0, 0, w, h).data;
-    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    let x0 = w, x1 = -1, area = 0, sx = 0, sy = 0;
     for(let y = 0; y < h; y++){
       for(let x = 0; x < w; x++){
         if(d[(y * w + x) * 4 + 3] > 24){
           if(x < x0) x0 = x; if(x > x1) x1 = x;
-          if(y < y0) y0 = y; if(y > y1) y1 = y;
+          area++; sx += x; sy += y;
         }
       }
     }
-    if(x1 >= x0 && y1 >= y0) FRUIT_BOX[tier] = {sx: x0, sy: y0, sw: x1 - x0 + 1, sh: y1 - y0 + 1};
+    if(!area) return;
+    // [수정] 용과·파인애플처럼 세로로 긴 그림은 bbox 긴 변에 맞추면 좌우가 비어 '투명 울타리'가 생김.
+    // → 그림의 실제 면적과 같은 원의 지름(D)에 맞추고, 무게중심을 충돌 원 중심에 둔다.
+    const D = 2 * Math.sqrt(area / Math.PI), bw = x1 - x0 + 1;
+    FRUIT_BOX[tier] = {cx: (sx / area + 0.5) / sc, cy: (sy / area + 0.5) / sc, fit: Math.min(D, bw) / sc};
   }catch(e){ /* CORS 등으로 측정 불가 → 전체 이미지로 그림 */ }
 }
 // [수정] 이미지 로드 실패 대비: 1) CORS 설정 없이 재시도(여백 측정만 포기) 2) 그래도 안 되면 이모지 과일로 표시
@@ -2734,10 +3021,24 @@ function suikaReset(){
   suikaGameOver=false; suikaSettled=false; suikaClock=0; suikaAcc=0;
   suikaAim=suikaCanvas?suikaCanvas.width/2:190;
 }
+// [밸런스] 미니게임 라임은 하루 한도 안에서만 지급. 실제 지급액을 돌려준다
+function grantMiniGold(amount){
+  amount=Math.max(0,Math.floor(Number(amount)||0));
+  const tk=todayKey();
+  if(!S.miniReward||S.miniReward.date!==tk) S.miniReward={date:tk,amount:0};
+  const give=Math.min(amount,Math.max(0,BAL.miniDailyCap-S.miniReward.amount));
+  S.miniReward.amount+=give; S.gold+=give;
+  return give;
+}
+function miniLeftToday(){
+  const used=(S.miniReward&&S.miniReward.date===todayKey())?S.miniReward.amount:0;
+  return Math.max(0,BAL.miniDailyCap-used);
+}
 function suikaSettle(){
   if(suikaSettled) return; suikaSettled=true;
-  const bonus=Math.floor(suikaScore/10);
-  if(bonus>0){ S.gold+=bonus; showFloat(`과일 합치기 보너스! +${bonus}🍋`); }
+  const earned=Math.floor(suikaScore/BAL.suikaScorePerGold);
+  const bonus=grantMiniGold(earned);
+  if(earned>0) showFloat(bonus<earned?`과일 합치기 보상 +${bonus}🍋 (오늘 미니게임 한도 도달)`:`과일 합치기 보상 +${bonus}🍋!`);
   if(suikaScore>(S.bestSuika||0)) S.bestSuika=suikaScore;
   save(); updateHUD();
 }
@@ -2765,6 +3066,12 @@ document.getElementById("suika-close-btn").onclick=()=>{
   document.getElementById("fullscreen-suika-modal").style.display="none";
   suikaSettle();
   switchBgmTrack("calm");
+};
+
+// [추가] 그만하기: 지금 점수로 게임을 끝내고 보상 정산 (화면을 누르면 새 게임)
+document.getElementById("suika-stop-btn").onclick=()=>{
+  if(!suikaRunning||suikaGameOver) return;
+  suikaGameOver=true; suikaSettle();
 };
 
 function dropBall(x){
@@ -2802,8 +3109,8 @@ function suikaStep(dt){
       if(a.tier<FRUIT_TIERS.length-1){
         const nt=a.tier+1,f=FRUIT_TIERS[nt];
         suikaBalls.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,vx:(a.vx+b.vx)/4,vy:(a.vy+b.vy)/4-90,tier:nt,r:f.radius,born:suikaClock-0.5,dead:false});
-        suikaScore+=f.score; S.gold+=Math.max(1,nt);
-      }else{ suikaScore+=FRUIT_TIERS[a.tier].score; S.gold+=30; }
+        suikaScore+=f.score;
+      }else{ suikaScore+=FRUIT_TIERS[a.tier].score*2; }
     });
     suikaBalls=suikaBalls.filter(b=>!b.dead); updateHUD();
   }
@@ -2820,8 +3127,8 @@ function drawFruit(ctx,x,y,tier,alpha){
   if(img && img.complete && img.naturalWidth>0){
     const bx = FRUIT_BOX[tier];
     if(bx){
-      const k = (r * 2) / Math.max(bx.sw, bx.sh), dw = bx.sw * k, dh = bx.sh * k;
-      ctx.drawImage(img, bx.sx, bx.sy, bx.sw, bx.sh, x - dw / 2, y - dh / 2, dw, dh);
+      const k = (r * 2) / bx.fit;
+      ctx.drawImage(img, x - bx.cx * k, y - bx.cy * k, img.naturalWidth * k, img.naturalHeight * k);
     }else{
       ctx.drawImage(img, x-r, y-r, r*2, r*2);
     }
@@ -2853,9 +3160,10 @@ function suikaLoop(now){
     drawFruit(ctx,ax,SK.SPAWN_Y,suikaCur,suikaCool>0?0.35:1);
   }
   suikaBalls.forEach(b=>drawFruit(ctx,b.x,b.y,b.tier));
-  ctx.save();ctx.fillStyle="rgba(255,255,255,.75)";ctx.beginPath();ctx.roundRect?ctx.roundRect(W-50,4,46,40,8):ctx.rect(W-50,4,46,40);ctx.fill();
-  ctx.font="900 8px sans-serif";ctx.textAlign="center";ctx.fillStyle="#b8860b";ctx.fillText("NEXT",W-27,14);ctx.restore();
-  ctx.save();ctx.translate(W-27,29);const nr=FRUIT_TIERS[suikaNext].radius,sc=Math.min(1,12/nr);ctx.scale(sc,sc);drawFruit(ctx,0,0,suikaNext);ctx.restore();
+  // [수정] NEXT 칸 확대 (46x40 → 78x84, 과일 미리보기 반지름 12 → 27)
+  ctx.save();ctx.fillStyle="rgba(255,255,255,.8)";ctx.strokeStyle="rgba(184,134,11,.45)";ctx.lineWidth=2;ctx.beginPath();ctx.roundRect?ctx.roundRect(W-84,6,78,84,12):ctx.rect(W-84,6,78,84);ctx.fill();ctx.stroke();
+  ctx.font="900 12px sans-serif";ctx.textAlign="center";ctx.fillStyle="#b8860b";ctx.fillText("NEXT",W-45,22);ctx.restore();
+  ctx.save();ctx.translate(W-45,57);const nr=FRUIT_TIERS[suikaNext].radius,sc=Math.min(1,27/nr);ctx.scale(sc,sc);drawFruit(ctx,0,0,suikaNext);ctx.restore();
   if(suikaGameOver){
     ctx.fillStyle="rgba(24,24,36,.72)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#fff";
     ctx.font="900 22px sans-serif";ctx.fillText("게임 오버",W/2,H/2-26);
@@ -2866,7 +3174,7 @@ function suikaLoop(now){
   suikaRaf=requestAnimationFrame(suikaLoop);
 }
 
-window.LimeGame={get S(){return S;},ACTIONS:ACTIONS,setAction:setAction,showFloat:showFloat,REAL_ESTATE_ITEMS:REAL_ESTATE_ITEMS,ROOM_SKIN_ITEMS:ROOM_SKIN_ITEMS};
+window.LimeGame={get S(){return Object.freeze({action:S.action,currentEstate:S.currentEstate,estateSkins:Object.freeze(Object.assign({},S.estateSkins)),level:S.level,mental:S.mental,stamina:S.stamina});},ACTIONS:ACTIONS,setAction:setAction,showFloat:showFloat,REAL_ESTATE_ITEMS:REAL_ESTATE_ITEMS,ROOM_SKIN_ITEMS:ROOM_SKIN_ITEMS};
 })();
 </script>
 <style>
@@ -2912,8 +3220,8 @@ window.LimeGame={get S(){return S;},ACTIONS:ACTIONS,setAction:setAction,showFloa
   .r3-reset{position:absolute;right:8px;top:112px;pointer-events:auto;width:26px;height:26px;border-radius:999px;background:rgba(255,255,255,.85);
     border:1.5px solid #2b2621;font-size:13px;font-weight:900;color:#2b2621;display:flex;align-items:center;justify-content:center}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" integrity="sha384-wagZhIFgY4hD+7awjQjR4e2E294y6J2HSnd8eTNc15ZubTeQeVRZwhQJ+W6hnBsf" crossorigin="anonymous"></script>
 <script>
 (function(){
 const host=document.getElementById('room-visual');
@@ -3007,6 +3315,7 @@ function lines(parent,segs){const g=new THREE.BufferGeometry().setAttribute('pos
 function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t;}
 function pickable(obj,key){obj.userData.pick=key;pickables.push(obj);return obj;}
 const pickables=[];
+function escH(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 const H=3.2,T=0.22,E=3.15, Wz0=-1.75,Wz1=0.65,Wy0=1.15,Wy1=2.65;
 const CH_HOME={x:-0.82,z:-1.62,r:0.38}, CH_DESK={x:-0.2,z:-1.74,r:-0.42};
@@ -3762,8 +4071,12 @@ function applyRoomSkin(now){
 // 위치(기본: 공주) 기준 오늘의 일출·일몰 계산 (NOAA 근사식, 오차 1~2분)
 const LOC_KEY='lime-room3d-loc';
 let roomLoc={lat:36.4466,lng:127.1190,name:'공주'};
-try{const v=JSON.parse(localStorage.getItem(LOC_KEY)||'null');if(v&&isFinite(v.lat)&&isFinite(v.lng))roomLoc=v;}catch(e){}
+try{const v=JSON.parse(localStorage.getItem(LOC_KEY)||'null');if(v&&isFinite(v.lat)&&isFinite(v.lng)&&Math.abs(v.lat)<=90&&Math.abs(v.lng)<=180)roomLoc={lat:+v.lat,lng:+v.lng,name:String(v.name||'설정 위치').slice(0,20)};}catch(e){}
 try{const tm=localStorage.getItem('lime-room3d-light');if(tm==='day'||tm==='night'||tm==='auto')timeMode=tm;}catch(e){}
+// [추가] 낮 밝기 (50~130%, 기본 85%) — 창문 메뉴의 슬라이더로 조절, 이 기기에 저장
+const DAYB_KEY='lime-room3d-daybright';
+let dayBright=0.85;
+try{const v=parseFloat(localStorage.getItem(DAYB_KEY));if(isFinite(v))dayBright=Math.max(0.5,Math.min(1.3,v));}catch(e){}
 let sunCache={k:'',rise:360,set:1140,polar:null};
 function sunTimes(d){
   const k=d.toDateString()+'|'+roomLoc.lat+'|'+roomLoc.lng;
@@ -3807,7 +4120,7 @@ function applyLighting(s){
   if(lampOn!==lastLampOn){lastLampOn=lampOn;
     if(lampBulb){lampBulb.material.color.setHex(lampOn?s.lamp.bulb:s.lamp.off);lampBulb.material.needsUpdate=true;}
     if(lampLight) lampLight.intensity=lampOn?(1.4*(l.lampMul==null?1:l.lampMul)):0;}
-  const mul=(l.mul==null?1:l.mul)*(night?0.52:1), wm=l.winMul==null?1:l.winMul;
+  const mul=(l.mul==null?1:l.mul)*(night?0.52:dayBright), wm=l.winMul==null?1:l.winMul;
   hemi.intensity=0.95*mul; sun.intensity=(night?0.25:1.35)*wm*mul; fill.intensity=(night?0.3:0.42)*mul;
   if(l.tint!=null&&l.tintAmt){tintC.setHex(l.tint);hemi.color.setHex(0xfffaf0).lerp(tintC,l.tintAmt);sun.color.setHex(0xfff4dc).lerp(tintC,l.tintAmt*0.7);}
   else{hemi.color.setHex(0xfffaf0);sun.color.setHex(0xfff4dc);}
@@ -3932,13 +4245,16 @@ function openSpotMenu(key,x,y){
 }
 function openHeroMenu(x,y){
   const s=G.S,a=curAction||G.ACTIONS[0];
-  showMenu(x,y,'<div class="r3-menu-title">🧑 내 캐릭터</div><div class="r3-menu-info">Lv.'+(s.level||1)+' · '+a.avatar+' '+a.name+'<br>멘탈 '+Math.round(s.mental||0)+' · 체력 '+Math.round(s.stamina||0)+'</div><button type="button" data-act="walk">👟 방 안에서 산책하기<span>멘탈 +8 · 체력 -5</span></button>');
+  showMenu(x,y,'<div class="r3-menu-title">🧑 내 캐릭터</div><div class="r3-menu-info">Lv.'+(Number(s.level)||1)+' · '+escH(a.avatar)+' '+escH(a.name)+'<br>멘탈 '+(Math.round(Number(s.mental))||0)+' · 체력 '+(Math.round(Number(s.stamina))||0)+'</div><button type="button" data-act="walk">👟 방 안에서 산책하기<span>멘탈 +8 · 체력 -5</span></button>');
 }
 function openWindowMenu(x,y){
   const m=timeMode==='auto'?'자동':(timeMode==='day'?'낮':'밤'), st=sunTimes(new Date());
   const info=st.polar?(st.polar==='night'?'극야':'백야'):('일출 '+fmtMin(st.rise)+' · 일몰 '+fmtMin(st.set));
-  showMenu(x,y,'<div class="r3-menu-title">🪟 창밖 시간대 ('+m+')</div><div class="r3-menu-info">📍 '+(roomLoc.name||'설정 위치')+' · '+info+'</div>'+
+  showMenu(x,y,'<div class="r3-menu-title">🪟 창밖 시간대 ('+m+')</div><div class="r3-menu-info">📍 '+escH(roomLoc.name||'설정 위치')+' · '+info+'</div>'+
     ['auto','day','night'].map(v=>'<button type="button" data-tm="'+v+'" class="'+(timeMode===v?'on':'')+'">'+(v==='auto'?'🕒 자동 (실제 일출·일몰)':(v==='day'?'☀️ 낮':'🌙 밤'))+'</button>').join('')+
+    '<div class="r3-menu-label">☀️ 낮 밝기 <span id="r3-dayb-val">'+Math.round(dayBright*100)+'%</span></div>'+
+    '<input type="range" id="r3-dayb" min="50" max="130" step="5" value="'+Math.round(dayBright*100)+'" style="width:100%;accent-color:#85b032">'+
+    '<button type="button" data-dayb="85">↺ 낮 밝기 기본값(85%)</button>'+
     '<button type="button" data-loc="1">📍 현재 위치로 맞추기<span>위치는 이 기기에만 저장돼요</span></button>');
 }
 menuEl.addEventListener('click',e=>{
@@ -3946,7 +4262,15 @@ menuEl.addEventListener('click',e=>{
   if(b.dataset.act){G.setAction(b.dataset.act);hideMenu();}
   else if(b.dataset.tm){timeMode=b.dataset.tm;try{localStorage.setItem('lime-room3d-light',timeMode);}catch(e){}applyLighting();hideMenu();}
   else if(b.dataset.loc){hideMenu();setRoomLocation();}
+  else if(b.dataset.dayb){setDayBright(+b.dataset.dayb);const r=document.getElementById('r3-dayb');if(r)r.value=b.dataset.dayb;}
 });
+function setDayBright(pct){
+  dayBright=Math.max(0.5,Math.min(1.3,pct/100));
+  try{localStorage.setItem(DAYB_KEY,String(dayBright));}catch(e){}
+  const v=document.getElementById('r3-dayb-val'); if(v) v.textContent=Math.round(dayBright*100)+'%';
+  applyLighting();
+}
+menuEl.addEventListener('input',e=>{if(e.target&&e.target.id==='r3-dayb')setDayBright(+e.target.value);});
 
 let downPos=null,hoverKey=null;
 canvas.addEventListener('pointerdown',e=>{downPos={x:e.clientX,y:e.clientY};if(menuOpen&&!menuEl.contains(e.target))hideMenu();});
